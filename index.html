@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Blossom Events ERP</title>
+<link rel="manifest" id="manifestLink">
+<meta name="theme-color" content="#4A1942">
+<style>
+:root{
+  --plum:#4A1942; --plum-2:#6B2B5C; --gold:#C9A15A; --gold-2:#E4C589;
+  --blush:#F2C7C2; --bg:#FBF7F4; --surface:#FFFFFF; --surface-2:#F6EFE9;
+  --ink:#2B2320; --ink-soft:#6b5f5a; --line:rgba(43,35,32,0.10);
+  --ok:#3E8E5A; --warn:#C77B2B; --danger:#B4443B;
+  --radius:18px; --radius-sm:12px;
+  --shadow:0 8px 30px rgba(74,25,66,0.10);
+  --font-display:'Fraunces',serif; --font-body:'Manrope',sans-serif; --font-mono:'JetBrains Mono',monospace;
+}
+[data-theme="dark"]{
+  --plum:#364d12; --plum-2:#a95f92; --gold:#e4c589; --gold-2:#f0d9a8;
+  --blush:#5c3a45; --bg:#1A1220; --surface:#241A2C; --surface-2:#2E2136;
+  --ink:#F3ECEE; --ink-soft:#c9bcc3; --line:rgba(243,236,238,0.10);
+  --shadow:0 8px 30px rgba(0,0,0,0.35);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+body{overscroll-behavior-y:none;}
+h1,h2,h3,.serif{font-family:var(--font-display);}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+
+#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg);}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 70%,transparent);backdrop-filter:blur(6px);padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--plum),var(--gold));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-weight:700;font-size:16px;flex-shrink:0;overflow:hidden;}
+.brand-logo img{width:100%;height:100%;object-fit:cover;}
+.brand-name{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.2px;}
+.brand-sub{font-size:11px;color:var(--ink-soft);margin-top:-2px;}
+.topbar-actions{display:flex;gap:8px;}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.icon-btn:active{transform:scale(0.94);}
+
+/* View header */
+.view-title{font-family:var(--font-display);font-size:22px;font-weight:600;margin:6px 16px 2px;}
+.view-sub{font-size:12.5px;color:var(--ink-soft);margin:0 16px 14px;}
+
+main{flex:1;padding:0 16px 100px;}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;}
+.glass{background:linear-gradient(135deg,rgba(255,255,255,0.55),rgba(255,255,255,0.25));backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.4);}
+[data-theme="dark"] .glass{background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.08);}
+
+/* Hero arch (signature element) */
+.hero-arch{position:relative;border-radius:28px 28px 120px 120px/28px 28px 60px 60px;background:linear-gradient(160deg,var(--plum) 0%,var(--plum-2) 55%,var(--gold) 130%);color:#fff;padding:22px 20px 26px;overflow:hidden;box-shadow:var(--shadow);}
+.hero-arch::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.18),transparent 70%);}
+.hero-eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.85;}
+.hero-figure{font-family:var(--font-display);font-size:34px;font-weight:600;margin:4px 0 2px;}
+.hero-label{font-size:12.5px;opacity:0.9;}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.hero-stat{background:rgba(255,255,255,0.14);border-radius:14px;padding:10px 12px;}
+.hero-stat .v{font-family:var(--font-mono);font-size:16px;font-weight:600;}
+.hero-stat .l{font-size:10.5px;opacity:0.85;margin-top:2px;}
+
+/* stat grid */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px 14px;}
+.stat-card .v{font-family:var(--font-mono);font-size:19px;font-weight:700;}
+.stat-card .l{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+.stat-card.ok .v{color:var(--ok);} .stat-card.warn .v{color:var(--warn);} .stat-card.danger .v{color:var(--danger);}
+
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);margin:18px 2px 8px;display:flex;align-items:center;justify-content:space-between;}
+.section-label a{color:var(--plum);text-decoration:none;font-weight:600;text-transform:none;letter-spacing:0;font-size:12.5px;}
+[data-theme="dark"] .section-label a{color:var(--gold-2);}
+
+/* Health bar */
+.health-bar{height:8px;border-radius:6px;background:var(--surface-2);overflow:hidden;margin-top:8px;}
+.health-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--plum));}
+
+/* List rows */
+.list-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;cursor:pointer;}
+.list-row:active{transform:scale(0.99);}
+.avatar{width:42px;height:42px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:600;color:var(--plum);flex-shrink:0;overflow:hidden;font-size:15px;}
+[data-theme="dark"] .avatar{color:var(--gold-2);}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.row-main{flex:1;min-width:0;}
+.row-title{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row-sub{font-size:12px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row-end{text-align:right;flex-shrink:0;}
+.row-amt{font-family:var(--font-mono);font-weight:700;font-size:14px;}
+.chip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:3px;letter-spacing:.3px;}
+.chip.ok{background:rgba(62,142,90,0.15);color:var(--ok);}
+.chip.warn{background:rgba(199,123,43,0.15);color:var(--warn);}
+.chip.danger{background:rgba(180,68,59,0.15);color:var(--danger);}
+.chip.neutral{background:var(--surface-2);color:var(--ink-soft);}
+.chip.plum{background:rgba(74,25,66,0.12);color:var(--plum);}
+[data-theme="dark"] .chip.plum{background:rgba(228,197,137,0.15);color:var(--gold-2);}
+
+/* Empty state */
+.empty{text-align:center;padding:48px 20px;color:var(--ink-soft);}
+.empty-icon{font-size:38px;margin-bottom:10px;}
+.empty-title{font-family:var(--font-display);font-size:17px;color:var(--ink);margin-bottom:4px;}
+.empty-sub{font-size:13px;margin-bottom:16px;}
+
+/* Buttons */
+.btn{border:none;border-radius:12px;padding:11px 18px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg,var(--plum),var(--plum-2));color:#fff;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#2B2320;}
+.btn-ghost{background:var(--surface-2);color:var(--ink);}
+.btn-danger{background:rgba(180,68,59,0.12);color:var(--danger);}
+.btn-block{width:100%;}
+.btn-sm{padding:7px 12px;font-size:12.5px;border-radius:9px;}
+
+/* FAB */
+.fab{position:fixed;right:calc(50% - 260px + 20px);bottom:96px;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--plum),var(--gold));color:#fff;border:none;font-size:26px;box-shadow:0 10px 24px rgba(74,25,66,0.35);z-index:30;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+@media (max-width:560px){.fab{right:20px;}}
+.fab:active{transform:scale(0.92);}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;z-index:25;max-width:520px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;color:var(--ink-soft);cursor:pointer;border:none;background:none;font-family:inherit;}
+.nav-item.active{color:var(--plum);}
+[data-theme="dark"] .nav-item.active{color:var(--gold-2);}
+.nav-item svg{width:21px;height:21px;}
+.nav-item span{font-size:10.5px;font-weight:600;}
+
+/* Forms / Sheets */
+.sheet-backdrop{position:fixed;inset:0;background:rgba(20,10,20,0.45);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.sheet-backdrop.open{opacity:1;pointer-events:auto;}
+.sheet{width:100%;max-width:520px;max-height:92vh;background:var(--bg);border-radius:24px 24px 0 0;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom);}
+.sheet-backdrop.open .sheet{transform:translateY(0);}
+.sheet-handle{width:40px;height:4px;background:var(--line);border-radius:4px;margin:10px auto 4px;}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 4px;}
+.sheet-head h3{margin:0;font-size:18px;}
+.sheet-body{padding:6px 20px 24px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14.5px;font-family:inherit;}
+.field textarea{resize:vertical;min-height:70px;}
+.field-inline{display:flex;gap:10px;align-items:center;}
+.field-inline input{flex:1;}
+.inline-field-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:11px 14px;font-size:14px;cursor:pointer;white-space:nowrap;}
+.inline-field-btn:active{transform:scale(0.97);}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+.form-actions{display:flex;gap:10px;margin-top:6px;}
+.form-actions .btn{flex:1;}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;}
+.tag-opt{padding:7px 13px;border-radius:20px;border:1px solid var(--line);background:var(--surface);font-size:13px;cursor:pointer;}
+.tag-opt.sel{background:var(--plum);color:#fff;border-color:var(--plum);}
+[data-theme="dark"] .tag-opt.sel{background:var(--gold);color:#241A2C;border-color:var(--gold);}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;}
+.tab{padding:8px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer;color:var(--ink-soft);}
+.tab.active{background:var(--plum);color:#fff;border-color:var(--plum);}
+[data-theme="dark"] .tab.active{background:var(--gold);color:#241A2C;border-color:var(--gold);}
+
+/* Search bar */
+.search-bar{display:flex;gap:8px;margin-bottom:12px;}
+.search-bar input{flex:1;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;}
+.filter-btn{width:42px;height:42px;border-radius:12px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+
+/* Toast / confirm */
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:80;opacity:0;transition:all .25s;pointer-events:none;max-width:90%;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast button{background:none;border:none;color:var(--gold-2);font-weight:700;margin-left:10px;cursor:pointer;}
+.confirm-backdrop{position:fixed;inset:0;background:rgba(20,10,20,0.5);z-index:90;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:20px;}
+.confirm-backdrop.open{opacity:1;pointer-events:auto;}
+.confirm-box{background:var(--bg);border-radius:20px;padding:22px;max-width:340px;width:100%;box-shadow:var(--shadow);}
+.confirm-box h3{margin:0 0 8px;font-size:17px;}
+.confirm-box p{margin:0 0 18px;font-size:13.5px;color:var(--ink-soft);}
+
+/* Wizard */
+.wizard-backdrop{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;overflow-y:auto;}
+.wizard-inner{max-width:480px;margin:0 auto;width:100%;padding:40px 24px 40px;}
+.wizard-step-dots{display:flex;gap:6px;justify-content:center;margin:22px 0 8px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line);}
+.dot.active{background:var(--plum);width:20px;border-radius:4px;}
+
+.loading-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loading-logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--plum),var(--gold));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-size:26px;font-weight:700;animation:pulse 1.6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+.pin-dots{display:flex;gap:14px;justify-content:center;margin:24px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink-soft);}
+.pin-dot.filled{background:var(--plum);border-color:var(--plum);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:280px;margin:0 auto;}
+.pin-key{aspect-ratio:1;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;font-weight:600;cursor:pointer;color:var(--ink);}
+
+.divider{height:1px;background:var(--line);margin:12px 0;}
+.muted{color:var(--ink-soft);}
+.text-ok{color:var(--ok);} .text-danger{color:var(--danger);} .text-warn{color:var(--warn);}
+a.link{color:var(--plum);text-decoration:none;font-weight:600;}
+[data-theme="dark"] a.link{color:var(--gold-2);}
+
+@media print{
+  .bottom-nav,.fab,.topbar,.icon-btn,.sheet-backdrop,.toast,.no-print{display:none !important;}
+  body,#app{background:#fff;color:#000;max-width:100%;}
+  main{padding:0;}
+}
+</style>
+</head>
+<body data-theme="light">
+<div id="loadingScreen" class="loading-screen"><div class="loading-logo">B</div><div class="muted" style="font-size:13px">Loading Blossom Events ERP…</div></div>
+
+<div id="app" style="display:none;">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo" id="brandLogo">B</div>
+      <div>
+        <div class="brand-name" id="brandName">Blossom Events</div>
+        <div class="brand-sub" id="brandSub">Event Business ERP</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">🌓</button>
+      <button class="icon-btn" onclick="Nav.go('settings')" title="Settings">⚙️</button>
+    </div>
+  </div>
+  <main id="mainView"></main>
+  <button class="fab" id="fabBtn">+</button>
+  <nav class="bottom-nav">
+    <button class="nav-item" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></button>
+    <button class="nav-item" data-view="events"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span>Events</span></button>
+    <button class="nav-item" data-view="finance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4.5a2 2 0 010 4H8.5"/></svg><span>Finance</span></button>
+    <button class="nav-item" data-view="resources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg><span>Resources</span></button>
+    <button class="nav-item" data-view="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>More</span></button>
+  </nav>
+</div>
+
+<div id="sheetBackdrop" class="sheet-backdrop"><div class="sheet" id="sheetContent"></div></div>
+<div id="confirmBackdrop" class="confirm-backdrop"></div>
+<div id="toast" class="toast"></div>
+<div id="wizardRoot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+/* ============================================================
+   BLOSSOM EVENTS ERP — CORE
+   ============================================================ */
+
+/* ---------------- UTILITIES ---------------- */
+const Util = {
+  uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,9); },
+  money(n){ n = Number(n)||0; const cur = (App.settings && App.settings.currency) || '₹';
+    const sign = n<0 ? '-' : ''; n = Math.abs(n);
+    return sign+cur+n.toLocaleString('en-IN',{maximumFractionDigits:0}); },
+  num(n){ return (Number(n)||0).toLocaleString('en-IN'); },
+  date(ts){ if(!ts) return '—'; const d=new Date(ts); return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); },
+  dateShort(ts){ if(!ts) return '—'; const d=new Date(ts); return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}); },
+  todayISO(){ return new Date().toISOString().slice(0,10); },
+  toTS(iso){ return iso? new Date(iso+'T00:00:00').getTime() : Date.now(); },
+  fromTS(ts){ return ts? new Date(ts).toISOString().slice(0,10) : Util.todayISO(); },
+  esc(s){ return (s===undefined||s===null)?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); },
+  initials(name){ if(!name) return '?'; return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase(); },
+  debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms||250); }; },
+  monthKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); },
+  isThisMonth(ts){ return Util.monthKey(ts)===Util.monthKey(Date.now()); },
+  isToday(ts){ return new Date(ts).toDateString()===new Date().toDateString(); },
+  sortByDateDesc(arr,key){ return [...arr].sort((a,b)=>(b[key]||0)-(a[key]||0)); },
+};
+
+/* ---------------- INDEXEDDB LAYER ---------------- */
+const DB_NAME='BlossomEventsERP', DB_VERSION=1;
+const STORES=['settings','partners','customers','events','payments','expenses','resources','reservations',
+  'suppliers','supplierPayments','workers','attendance','workerPayments','wallets','ledger','partnerTx','activityLog'];
+let _db=null;
+function dbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=(e)=>{
+      const db=e.target.result;
+      STORES.forEach(s=>{ if(!db.objectStoreNames.contains(s)) db.createObjectStore(s,{keyPath:'id'}); });
+    };
+    req.onsuccess=()=>{ _db=req.result; resolve(_db); };
+    req.onerror=()=>reject(req.error);
+  });
+}
+function tx(store,mode){ return _db.transaction(store,mode).objectStore(store); }
+function dbGetAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
+function dbPut(store,obj){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(obj); r.onsuccess=()=>res(obj); r.onerror=()=>rej(r.error); }); }
+function dbDelete(store,id){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(id); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); }); }
+function dbClear(store){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').clear(); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); }); }
+
+/* ---------------- APP STATE ---------------- */
+const App = { settings:{}, cache:{}, view:'dashboard', viewParams:{} };
+STORES.forEach(s=>{ if(s!=='settings') App.cache[s]=[]; });
+
+function C(store){ return App.cache[store]; }
+function findById(store,id){ return C(store).find(x=>x.id===id); }
+
+async function addRecord(store,obj){
+  obj.id = obj.id || Util.uid();
+  obj.createdAt = obj.createdAt || Date.now();
+  obj.updatedAt = Date.now();
+  await dbPut(store,obj);
+  C(store).push(obj);
+  logActivity(`Added ${store.slice(0,-1)}: ${obj.name||obj.title||obj.id}`);
+  return obj;
+}
+async function updateRecord(store,obj){
+  obj.updatedAt = Date.now();
+  await dbPut(store,obj);
+  const i=C(store).findIndex(x=>x.id===obj.id);
+  if(i>-1) C(store)[i]=obj; else C(store).push(obj);
+  return obj;
+}
+async function deleteRecord(store,id){
+  await dbDelete(store,id);
+  App.cache[store] = C(store).filter(x=>x.id!==id);
+}
+async function logActivity(msg){
+  const rec={id:Util.uid(),ts:Date.now(),msg};
+  await dbPut('activityLog',rec);
+  C('activityLog').push(rec);
+}
+
+/* Wallet ledger helper — every cash movement funnels through here */
+async function addLedger({walletId,dir,amount,date,category,refType,refId,note}){
+  return addRecord('ledger',{walletId,dir,amount:Number(amount)||0,date:date||Util.todayISO(),category,refType,refId,note:note||''});
+}
+async function removeLedgerByRef(refType,refId){
+  const items = C('ledger').filter(l=>l.refType===refType && l.refId===refId);
+  for(const it of items) await deleteRecord('ledger',it.id);
+}
+function walletBalance(walletId){
+  const w = findById('wallets',walletId); if(!w) return 0;
+  let bal = Number(w.opening)||0;
+  C('ledger').forEach(l=>{ if(l.walletId===walletId){ bal += (l.dir==='in'? l.amount : -l.amount); } });
+  return bal;
+}
+function totalCash(){ return C('wallets').reduce((s,w)=>s+walletBalance(w.id),0); }
+
+/* ---------------- BOOT ---------------- */
+async function boot(){
+  await dbOpen();
+  const settingsArr = await dbGetAll('settings');
+  App.settings = settingsArr.find(s=>s.id==='main') || null;
+  for(const s of STORES){ if(s==='settings') continue; App.cache[s] = await dbGetAll(s); }
+
+  document.getElementById('loadingScreen').style.display='none';
+
+  if(!App.settings || !App.settings.setupDone){
+    Wizard.start();
+    return;
+  }
+  if(App.settings.pin){
+    PinLock.show(()=>startApp());
+  } else {
+    startApp();
+  }
+}
+function startApp(){
+  document.getElementById('app').style.display='flex';
+  applyTheme(App.settings.theme||'light');
+  applyBranding();
+  Nav.go('dashboard');
+  setupPWA();
+}
+function applyBranding(){
+  document.getElementById('brandName').textContent = App.settings.bizName || 'Blossom Events';
+  document.title = (App.settings.bizName||'Blossom Events')+' ERP';
+  const logoEl=document.getElementById('brandLogo');
+  if(App.settings.logo){ logoEl.innerHTML = `<img src="${App.settings.logo}">`; }
+  else { logoEl.textContent = Util.initials(App.settings.bizName||'Blossom')[0]; }
+}
+function applyTheme(t){
+  if(t==='system'){ t = window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; }
+  document.body.setAttribute('data-theme',t);
+}
+document.getElementById('themeToggle').onclick=()=>{
+  const cur=document.body.getAttribute('data-theme');
+  const next = cur==='dark'?'light':'dark';
+  applyTheme(next);
+  App.settings.theme=next; updateRecordSettings();
+};
+async function updateRecordSettings(){ await dbPut('settings',App.settings); }
+
+/* ---------------- NAV / ROUTER ---------------- */
+const Nav = {
+  go(view, params){
+    App.view = view; App.viewParams = params||{};
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view || (view==='more-'&&b.dataset.view==='more')));
+    const main=document.getElementById('mainView');
+    main.scrollTop=0;
+    if(Views[view]) main.innerHTML = Views[view](params);
+    else main.innerHTML = Views.notfound();
+    updateFab();
+  }
+};
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.onclick=()=>Nav.go(btn.dataset.view);
+});
+
+function updateFab(){
+  const fab=document.getElementById('fabBtn');
+  const map={ dashboard:null, events:()=>EventsUI.openForm(), finance:()=>FinanceUI.openTxForm(),
+    resources:()=>Entities.resources.openForm(), more:null,
+    partners:()=>Entities.partners.openForm(), customers:()=>Entities.customers.openForm(),
+    suppliers:()=>Entities.suppliers.openForm(), workers:()=>Entities.workers.openForm(),
+    expenses:()=>ExpensesUI.openForm(), reports:null, settings:null, wallets:()=>FinanceUI.openWalletForm() };
+  const action = map[App.view];
+  if(action){ fab.style.display='flex'; fab.onclick=action; } else { fab.style.display='none'; }
+}
+
+/* ---------------- SHEET / TOAST / CONFIRM ---------------- */
+function openSheet(title, bodyHtml){
+  document.getElementById('sheetContent').innerHTML = `
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>${Util.esc(title)}</h3><button class="icon-btn" onclick="closeSheet()">✕</button></div>
+    <div class="sheet-body">${bodyHtml}</div>`;
+  document.getElementById('sheetBackdrop').classList.add('open');
+}
+function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('open'); }
+document.getElementById('sheetBackdrop').addEventListener('click',e=>{ if(e.target.id==='sheetBackdrop') closeSheet(); });
+
+let _toastTimer=null;
+function toast(msg, undoFn){
+  const t=document.getElementById('toast');
+  t.innerHTML = Util.esc(msg) + (undoFn? ` <button onclick="(${undoWrap.toString()})()">UNDO</button>`:'');
+  if(undoFn) window.__lastUndo=undoFn;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>t.classList.remove('show'), 3800);
+}
+function undoWrap(){ if(window.__lastUndo){ window.__lastUndo(); window.__lastUndo=null; document.getElementById('toast').classList.remove('show'); } }
+
+function confirmDialog(title,msg,onYes,okLabel){
+  const el=document.getElementById('confirmBackdrop');
+  el.innerHTML = `<div class="confirm-box">
+    <h3>${Util.esc(title)}</h3><p>${Util.esc(msg)}</p>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('confirmBackdrop').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" id="confirmYesBtn">${Util.esc(okLabel||'Delete')}</button>
+    </div></div>`;
+  el.classList.add('open');
+  document.getElementById('confirmYesBtn').onclick=()=>{ el.classList.remove('open'); onYes(); };
+}
+
+/* ---------------- FIELD RENDERER (shared by all entity forms) ---------------- */
+function renderField(f, val){
+  val = val===undefined? (f.default!==undefined?f.default:'') : val;
+  const id = 'f_'+f.key;
+  if(f.type==='select'){
+    return `<div class="field"><label>${f.label}${f.required?' *':''}</label>
+      <select id="${id}">${f.options.map(o=>{
+        const ov = typeof o==='object'? o.value : o; const ol = typeof o==='object'? o.label : o;
+        return `<option value="${Util.esc(ov)}" ${val===ov?'selected':''}>${Util.esc(ol)}</option>`;
+      }).join('')}</select></div>`;
+  }
+  if(f.type==='textarea'){
+    return `<div class="field"><label>${f.label}</label><textarea id="${id}">${Util.esc(val)}</textarea></div>`;
+  }
+  if(f.type==='image'){
+    return `<div class="field"><label>${f.label}</label>
+      <input type="file" accept="image/*" id="${id}_file" onchange="handleImageInput('${id}')">
+      <input type="hidden" id="${id}" value="${Util.esc(val)}">
+      <div id="${id}_preview" style="margin-top:8px;">${val?`<img src="${val}" style="width:64px;height:64px;object-fit:cover;border-radius:12px;">`:''}</div></div>`;
+  }
+  if(f.key==='customerName'){
+    return `<div class="field"><label>${f.label}${f.required?' *':''}</label>
+      <div class="field-inline">
+        <input type="${f.type||'text'}" id="${id}" value="${Util.esc(val)}" ${f.step?`step="${f.step}"`:''} placeholder="${Util.esc(f.placeholder||'')}">
+        <button type="button" class="inline-field-btn" onclick="pickCustomerContact()">📇</button>
+      </div></div>`;
+  }
+  return `<div class="field"><label>${f.label}${f.required?' *':''}</label>
+    <input type="${f.type||'text'}" id="${id}" value="${Util.esc(val)}" ${f.step?`step="${f.step}"`:''} placeholder="${Util.esc(f.placeholder||'')}"></div>`;
+}
+function handleImageInput(id){
+  const file = document.getElementById(id+'_file').files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload=()=>{
+    document.getElementById(id).value = reader.result;
+    document.getElementById(id+'_preview').innerHTML = `<img src="${reader.result}" style="width:64px;height:64px;object-fit:cover;border-radius:12px;">`;
+  };
+  reader.readAsDataURL(file);
+}
+function readFieldValue(f){
+  const el=document.getElementById('f_'+f.key); if(!el) return f.default;
+  let v = el.value;
+  if(f.type==='number') v = v===''? 0 : Number(v);
+  return v;
+}
+function validateFields(fields){
+  for(const f of fields){ if(f.required){ const v=readFieldValue(f); if(v===''||v===null||v===undefined){ toast(`${f.label} is required`); return false; } } }
+  return true;
+}
+
+function supportsContactPicker(){
+  return ('contacts' in navigator) && ('ContactsManager' in window);
+}
+async function pickCustomerContact(){
+  if(!supportsContactPicker()){
+    toast('Contacts import requires a compatible browser on mobile.');
+    return;
+  }
+  try{
+    const props = ['name','tel'];
+    const opts = {multiple:false};
+    const contacts = await navigator.contacts.select(props, opts);
+    if(!contacts || !contacts.length) return;
+    const contact = contacts[0];
+    const name = (contact.name && contact.name[0]) || '';
+    const phone = (contact.tel && contact.tel[0]) || '';
+    const nameEl = document.getElementById('f_customerName');
+    if(nameEl) nameEl.value = name;
+    const phoneEl = document.getElementById('f_customerPhone');
+    if(phoneEl) phoneEl.value = phone;
+  }catch(err){
+    toast('Could not open contacts');
+  }
+}
+
+/* ============================================================
+   GENERIC ENTITY ENGINE
+   ============================================================ */
+function makeEntity(cfg){
+  return {
+    cfg,
+    list(q){
+      let items = C(cfg.store);
+      if(q) items = items.filter(it=>cfg.search(it,q.toLowerCase()));
+      return Util.sortByDateDesc(items,'createdAt');
+    },
+    render(q){
+      const items = this.list(q);
+      if(!items.length){
+        return `<div class="empty"><div class="empty-icon">${cfg.icon}</div>
+          <div class="empty-title">No ${cfg.plural.toLowerCase()} yet</div>
+          <div class="empty-sub">${cfg.emptyHint||'Add your first record to get started.'}</div>
+          <button class="btn btn-primary" onclick="Entities.${cfg.store}.openForm()">+ Add ${cfg.singular}</button></div>`;
+      }
+      return items.map(it=>cfg.row(it)).join('');
+    },
+    openForm(id){
+      const existing = id? findById(cfg.store,id) : null;
+      const fieldsHtml = cfg.fields.map(f=>renderField(f, existing? existing[f.key] : f.default)).join('');
+      openSheet((existing?'Edit ':'Add ')+cfg.singular, `
+        <div>${fieldsHtml}</div>
+        <div class="form-actions">
+          ${existing?`<button class="btn btn-danger" onclick="Entities.${cfg.store}.remove('${existing.id}')">Delete</button>`:''}
+          <button class="btn btn-primary btn-block" onclick="Entities.${cfg.store}.save(${existing?`'${existing.id}'`:'null'})">Save ${cfg.singular}</button>
+        </div>`);
+    },
+    async save(id){
+      if(!validateFields(cfg.fields)) return;
+      const obj = id? {...findById(cfg.store,id)} : {};
+      cfg.fields.forEach(f=>{ obj[f.key]=readFieldValue(f); });
+      if(cfg.beforeSave) cfg.beforeSave(obj);
+      if(id) await updateRecord(cfg.store,obj); else await addRecord(cfg.store,obj);
+      closeSheet();
+      toast(`${cfg.singular} saved`);
+      Nav.go(App.view);
+    },
+    remove(id){
+      const item=findById(cfg.store,id);
+      confirmDialog(`Delete ${cfg.singular}?`, `This will permanently remove "${item.name||''}". This cannot be undone.`, async ()=>{
+        await deleteRecord(cfg.store,id);
+        closeSheet();
+        toast(`${cfg.singular} deleted`);
+        Nav.go(App.view);
+      });
+    }
+  };
+}
+
+const Entities = {};
+
+Entities.partners = makeEntity({
+  store:'partners', singular:'Partner', plural:'Partners', icon:'🤝',
+  emptyHint:'Add the people who co-own this event business.',
+  fields:[
+    {key:'name',label:'Full Name',required:true},
+    {key:'phone',label:'Phone',type:'tel'},
+    {key:'email',label:'Email',type:'email'},
+    {key:'address',label:'Address',type:'textarea'},
+    {key:'profitShare',label:'Profit Share %',type:'number',default:50},
+    {key:'notes',label:'Notes',type:'textarea'},
+    {key:'photo',label:'Photo',type:'image'},
+    {key:'active',label:'Status',type:'select',options:[{value:'active',label:'Active'},{value:'inactive',label:'Inactive'}],default:'active'},
+  ],
+  search:(p,q)=>(p.name||'').toLowerCase().includes(q)||(p.phone||'').includes(q),
+  row(p){
+    const inv = C('partnerTx').filter(t=>t.partnerId===p.id&&t.type==='investment').reduce((s,t)=>s+t.amount,0);
+    const wd = C('partnerTx').filter(t=>t.partnerId===p.id&&t.type==='withdrawal').reduce((s,t)=>s+t.amount,0);
+    return `<div class="list-row" onclick="PartnerUI.openProfile('${p.id}')">
+      <div class="avatar">${p.photo?`<img src="${p.photo}">`:Util.initials(p.name)}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(p.name)}</div><div class="row-sub">Invested ${Util.money(inv)} · Withdrawn ${Util.money(wd)}</div></div>
+      <div class="row-end"><span class="chip ${p.active==='inactive'?'neutral':'ok'}">${p.active==='inactive'?'Inactive':'Active'}</span></div>
+    </div>`;
+  }
+});
+
+Entities.customers = makeEntity({
+  store:'customers', singular:'Customer', plural:'Customers', icon:'👥',
+  emptyHint:'Add a customer when you get a new enquiry or booking.',
+  fields:[
+    {key:'name',label:'Full Name',required:true},
+    {key:'phone',label:'Phone',type:'tel',required:true},
+    {key:'whatsapp',label:'WhatsApp Number',type:'tel'},
+    {key:'address',label:'Address',type:'textarea'},
+    {key:'reference',label:'Reference'},
+    {key:'gst',label:'GST Number (optional)'},
+    {key:'notes',label:'Notes',type:'textarea'},
+    {key:'photo',label:'Photo',type:'image'},
+  ],
+  search:(c,q)=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q),
+  row(c){
+    const evs = C('events').filter(e=>e.customerId===c.id);
+    const pending = evs.reduce((s,e)=>s+Math.max(0,(Number(e.contractAmount)||0)-eventReceived(e.id)),0);
+    return `<div class="list-row" onclick="Nav.go('customerProfile',{id:'${c.id}'})">
+      <div class="avatar">${c.photo?`<img src="${c.photo}">`:Util.initials(c.name)}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(c.name)}</div><div class="row-sub">${Util.esc(c.phone||'')} · ${evs.length} event${evs.length!==1?'s':''}</div></div>
+      <div class="row-end"><div class="row-amt ${pending>0?'text-warn':'text-ok'}">${pending>0?Util.money(pending)+' due':'Clear'}</div></div>
+    </div>`;
+  }
+});
+
+Entities.suppliers = makeEntity({
+  store:'suppliers', singular:'Supplier', plural:'Suppliers', icon:'🚚',
+  emptyHint:'Add vendors who rent or supply materials to your events.',
+  fields:[
+    {key:'name',label:'Supplier Name',required:true},
+    {key:'phone',label:'Phone',type:'tel'},
+    {key:'whatsapp',label:'WhatsApp Number',type:'tel'},
+    {key:'address',label:'Address',type:'textarea'},
+    {key:'gst',label:'GST Number (optional)'},
+    {key:'notes',label:'Notes',type:'textarea'},
+    {key:'photo',label:'Photo',type:'image'},
+  ],
+  search:(s,q)=>(s.name||'').toLowerCase().includes(q)||(s.phone||'').includes(q),
+  row(s){
+    const paid = C('supplierPayments').filter(p=>p.supplierId===s.id).reduce((a,p)=>a+p.amount,0);
+    const owed = supplierOutstanding(s.id);
+    return `<div class="list-row" onclick="Nav.go('supplierProfile',{id:'${s.id}'})">
+      <div class="avatar">${s.photo?`<img src="${s.photo}">`:Util.initials(s.name)}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(s.name)}</div><div class="row-sub">${Util.esc(s.phone||'')} · Paid ${Util.money(paid)}</div></div>
+      <div class="row-end"><div class="row-amt ${owed>0?'text-warn':'text-ok'}">${owed>0?Util.money(owed)+' owed':'Settled'}</div></div>
+    </div>`;
+  }
+});
+
+Entities.workers = makeEntity({
+  store:'workers', singular:'Worker', plural:'Workers', icon:'👷',
+  emptyHint:'Add daily-wage staff or freelancers you assign to events.',
+  fields:[
+    {key:'name',label:'Full Name',required:true},
+    {key:'phone',label:'Phone',type:'tel'},
+    {key:'skill',label:'Skill / Role',placeholder:'e.g. Decorator, Electrician'},
+    {key:'dailyWage',label:'Daily Wage',type:'number'},
+    {key:'bankUpi',label:'Bank / UPI ID'},
+    {key:'emergencyContact',label:'Emergency Contact',type:'tel'},
+    {key:'notes',label:'Notes',type:'textarea'},
+    {key:'photo',label:'Photo',type:'image'},
+    {key:'active',label:'Status',type:'select',options:[{value:'active',label:'Active'},{value:'inactive',label:'Inactive'}],default:'active'},
+  ],
+  search:(w,q)=>(w.name||'').toLowerCase().includes(q)||(w.skill||'').toLowerCase().includes(q),
+  row(w){
+    const pendingWage = workerPendingWage(w.id);
+    return `<div class="list-row" onclick="Nav.go('workerProfile',{id:'${w.id}'})">
+      <div class="avatar">${w.photo?`<img src="${w.photo}">`:Util.initials(w.name)}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(w.name)}</div><div class="row-sub">${Util.esc(w.skill||'General')} · ${Util.money(w.dailyWage)}/day</div></div>
+      <div class="row-end"><div class="row-amt ${pendingWage>0?'text-warn':'text-ok'}">${pendingWage>0?Util.money(pendingWage)+' due':'Clear'}</div></div>
+    </div>`;
+  }
+});
+
+Entities.resources = makeEntity({
+  store:'resources', singular:'Resource', plural:'Resources', icon:'🎪',
+  emptyHint:'Add stage, lighting, sound or decor assets your business owns or rents.',
+  fields:[
+    {key:'name',label:'Resource Name',required:true},
+    {key:'category',label:'Category',type:'select',options:['Stage','Lighting','Sound','Flower Decoration','Flex Frame','Chair','Table','Generator','Carpet','Backdrop','Fabric','Electrical','Other']},
+    {key:'type',label:'Ownership',type:'select',options:[{value:'own',label:'Own Resource'},{value:'rental',label:'Rental Resource'}],default:'own'},
+    {key:'code',label:'Code / Tag'},
+    {key:'qty',label:'Total Quantity',type:'number',default:1},
+    {key:'unit',label:'Unit',placeholder:'pcs, sets, sq.ft'},
+    {key:'purchaseDate',label:'Purchase Date',type:'date'},
+    {key:'purchaseCost',label:'Purchase Cost',type:'number'},
+    {key:'currentValue',label:'Current Value',type:'number'},
+    {key:'rentalPrice',label:'Rental Price (per event)',type:'number'},
+    {key:'maintenanceCost',label:'Maintenance Cost',type:'number'},
+    {key:'supplierId',label:'Supplier (if rented)',type:'select',options:()=>[{value:'',label:'— None —'},...C('suppliers').map(s=>({value:s.id,label:s.name}))]},
+    {key:'location',label:'Storage Location'},
+    {key:'condition',label:'Condition',type:'select',options:['Excellent','Good','Fair','Needs Repair']},
+    {key:'status',label:'Status',type:'select',options:['Available','Reserved','In Use','Maintenance','Damaged','Lost'],default:'Available'},
+    {key:'notes',label:'Notes',type:'textarea'},
+    {key:'photo',label:'Photo',type:'image'},
+  ],
+  search:(r,q)=>(r.name||'').toLowerCase().includes(q)||(r.category||'').toLowerCase().includes(q)||(r.code||'').toLowerCase().includes(q),
+  row(r){
+    const reserved = reservedQty(r.id);
+    const avail = (Number(r.qty)||0) - reserved;
+    const stMap={Available:'ok',Reserved:'warn','In Use':'warn',Maintenance:'neutral',Damaged:'danger',Lost:'danger'};
+    return `<div class="list-row" onclick="Entities.resources.openForm('${r.id}')">
+      <div class="avatar">${r.photo?`<img src="${r.photo}">`:'🎪'}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(r.name)}</div><div class="row-sub">${Util.esc(r.category||'')} · ${r.type==='rental'?'Rental':'Own'} · ${avail}/${r.qty||0} ${Util.esc(r.unit||'')} free</div></div>
+      <div class="row-end"><span class="chip ${stMap[r.status]||'neutral'}">${Util.esc(r.status||'Available')}</span></div>
+    </div>`;
+  }
+});
+// resolve function-based select options at render time
+(function patchDynamicOptions(){
+  const orig = renderField;
+  window.renderField = function(f,val){
+    if(typeof f.options==='function') f = {...f, options:f.options()};
+    return orig(f,val);
+  };
+})();
+
+Entities.wallets = makeEntity({
+  store:'wallets', singular:'Wallet', plural:'Wallets', icon:'💰',
+  emptyHint:'Add Cash, Bank, UPI or partner wallets to track money.',
+  fields:[
+    {key:'name',label:'Wallet Name',required:true,placeholder:'Cash, Bank, UPI, Hamza Wallet…'},
+    {key:'type',label:'Type',type:'select',options:['Cash','Bank','UPI','Partner Wallet','Custom'],default:'Cash'},
+    {key:'opening',label:'Opening Balance',type:'number',default:0},
+  ],
+  search:(w,q)=>(w.name||'').toLowerCase().includes(q),
+  row(w){
+    const bal = walletBalance(w.id);
+    return `<div class="list-row" onclick="Entities.wallets.openForm('${w.id}')">
+      <div class="avatar">💳</div>
+      <div class="row-main"><div class="row-title">${Util.esc(w.name)}</div><div class="row-sub">${Util.esc(w.type||'')}</div></div>
+      <div class="row-end"><div class="row-amt ${bal<0?'text-danger':''}">${Util.money(bal)}</div></div>
+    </div>`;
+  }
+});
+
+/* ---------------- CALC HELPERS shared across modules ---------------- */
+function eventReceived(eventId){ return C('payments').filter(p=>p.eventId===eventId).reduce((s,p)=>s+p.amount,0); }
+function eventExpenses(eventId){ return C('expenses').filter(e=>e.eventId===eventId).reduce((s,e)=>s+e.amount,0)
+  + C('workerPayments').filter(w=>w.eventId===eventId).reduce((s,w)=>s+w.amount,0); }
+function eventProfit(ev){ return (Number(ev.contractAmount)||0) - eventExpenses(ev.id); }
+function reservedQty(resourceId){
+  return C('reservations').filter(r=>r.resourceId===resourceId && r.status!=='returned').reduce((s,r)=>s+(Number(r.qty)-Number(r.returnedQty||0)),0);
+}
+function supplierOutstanding(supplierId){
+  const supplied = C('resources').filter(r=>r.supplierId===supplierId).reduce((s,r)=>s+(Number(r.rentalPrice)||0),0);
+  const expenseOwed = C('expenses').filter(e=>e.supplierId===supplierId).reduce((s,e)=>s+e.amount,0);
+  const paid = C('supplierPayments').filter(p=>p.supplierId===supplierId).reduce((s,p)=>s+p.amount,0);
+  return Math.max(0, expenseOwed - paid);
+}
+function workerPendingWage(workerId){
+  const present = C('attendance').filter(a=>a.workerId===workerId);
+  const worker = findById('workers',workerId);
+  const wage = Number(worker&&worker.dailyWage)||0;
+  const earned = present.reduce((s,a)=>{
+    if(a.status==='present') return s+wage;
+    if(a.status==='half') return s+wage/2;
+    if(a.status==='late') return s+wage;
+    return s;
+  },0);
+  const paid = C('workerPayments').filter(p=>p.workerId===workerId).reduce((s,p)=>s+p.amount,0);
+  return Math.max(0, earned-paid);
+}
+function walletOptions(){ return C('wallets').map(w=>({value:w.id,label:w.name})); }
+
+/* ============================================================
+   SETUP WIZARD (first run only)
+   ============================================================ */
+const Wizard = {
+  step:0,
+  data:{ bizName:'', logo:'', address:'', phone:'', currency:'₹', pin:'' },
+  steps:['welcome','business','contact','currency','security','partners'],
+  start(){
+    this.step=0;
+    document.getElementById('wizardRoot').innerHTML = `<div class="wizard-backdrop" id="wizBackdrop"></div>`;
+    this.render();
+  },
+  render(){
+    const s = this.steps[this.step];
+    let body='';
+    if(s==='welcome'){
+      body=`<div style="text-align:center;padding-top:30px;">
+        <div class="loading-logo" style="margin:0 auto 20px;">B</div>
+        <h1 class="serif" style="font-size:26px;margin-bottom:8px;">Welcome to Blossom Events ERP</h1>
+        <p class="muted" style="font-size:14px;line-height:1.6;">Let's set up your event business in a minute, bookings, partners, finance, resources and reports, all working offline on this device.</p>
+        <button class="btn btn-primary btn-block" style="margin-top:26px;" onclick="Wizard.next()">Get Started</button>
+      </div>`;
+    } else if(s==='business'){
+      body=this.shell('Your business', `
+        <div class="field"><label>Business Name *</label><input id="wBizName" value="${Util.esc(this.data.bizName)}" placeholder="Blossom Events"></div>
+        <div class="field"><label>Logo (optional)</label>
+          <input type="file" accept="image/*" id="wLogoFile" onchange="Wizard.handleLogo(event)">
+          <div id="wLogoPreview" style="margin-top:8px;">${this.data.logo?`<img src="${this.data.logo}" style="width:56px;height:56px;object-fit:cover;border-radius:14px;">`:''}</div>
+        </div>`, ()=>{
+        const v=document.getElementById('wBizName').value.trim();
+        if(!v){ toast('Business name is required'); return false; }
+        this.data.bizName=v; return true;
+      });
+    } else if(s==='contact'){
+      body=this.shell('Contact details', `
+        <div class="field"><label>Address</label><textarea id="wAddress">${Util.esc(this.data.address)}</textarea></div>
+        <div class="field"><label>Phone</label><input id="wPhone" type="tel" value="${Util.esc(this.data.phone)}"></div>`, ()=>{
+        this.data.address=document.getElementById('wAddress').value;
+        this.data.phone=document.getElementById('wPhone').value;
+        return true;
+      });
+    } else if(s==='currency'){
+      body=this.shell('Currency', `
+        <div class="field"><label>Currency Symbol</label>
+          <select id="wCurrency">
+            ${['₹','$','€','£','AED'].map(c=>`<option value="${c}" ${this.data.currency===c?'selected':''}>${c}</option>`).join('')}
+          </select></div>`, ()=>{ this.data.currency=document.getElementById('wCurrency').value; return true; });
+    } else if(s==='security'){
+      body=this.shell('Set a PIN (optional)', `
+        <p class="muted" style="font-size:13px;margin-bottom:12px;">A 4-digit PIN locks the app on this device. Leave blank to skip.</p>
+        <div class="field"><label>PIN</label><input id="wPin" type="password" inputmode="numeric" maxlength="4" placeholder="e.g. 1234"></div>`, ()=>{
+        const v=document.getElementById('wPin').value.trim();
+        if(v && !/^\d{4}$/.test(v)){ toast('PIN must be 4 digits'); return false; }
+        this.data.pin=v; return true;
+      });
+    } else if(s==='partners'){
+      body=`<div class="wizard-inner">
+        <div class="wizard-step-dots">${this.dots()}</div>
+        <h2 class="serif" style="font-size:20px;">Default partners</h2>
+        <p class="muted" style="font-size:13px;margin-bottom:16px;">We'll create these two partners to start. You can add, edit or remove partners anytime later.</p>
+        <div class="card"><div class="row-title">Hamza</div><div class="row-sub muted">Partner, 50% profit share</div></div>
+        <div class="card"><div class="row-title">Siddik</div><div class="row-sub muted">Partner, 50% profit share</div></div>
+        <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="Wizard.finish()">Create Business</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="Wizard.back()">Back</button>
+      </div>`;
+    }
+    document.getElementById('wizBackdrop').innerHTML = body;
+  },
+  shell(title, fieldsHtml, onNext){
+    this._onNext = onNext;
+    return `<div class="wizard-inner">
+      <div class="wizard-step-dots">${this.dots()}</div>
+      <h2 class="serif" style="font-size:20px;">${title}</h2>
+      <div style="margin-top:16px;">${fieldsHtml}</div>
+      <div class="form-actions" style="margin-top:20px;">
+        ${this.step>0?`<button class="btn btn-ghost" onclick="Wizard.back()">Back</button>`:''}
+        <button class="btn btn-primary" style="flex:1;" onclick="Wizard.next()">Continue</button>
+      </div>
+    </div>`;
+  },
+  dots(){ return this.steps.slice(1).map((_,i)=>`<div class="dot ${i===this.step-1?'active':''}"></div>`).join(''); },
+  handleLogo(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ this.data.logo=reader.result; document.getElementById('wLogoPreview').innerHTML=`<img src="${reader.result}" style="width:56px;height:56px;object-fit:cover;border-radius:14px;">`; };
+    reader.readAsDataURL(file);
+  },
+  next(){
+    if(this._onNext && this._onNext()===false) return;
+    this.step++;
+    this.render();
+  },
+  back(){ this.step--; this.render(); },
+  async finish(){
+    App.settings = { id:'main', bizName:this.data.bizName, logo:this.data.logo, address:this.data.address,
+      phone:this.data.phone, currency:this.data.currency, pin:this.data.pin, theme:'light', setupDone:true };
+    await dbPut('settings',App.settings);
+    await addRecord('partners',{name:'Hamza',phone:'',profitShare:50,active:'active'});
+    await addRecord('partners',{name:'Siddik',phone:'',profitShare:50,active:'active'});
+    await addRecord('wallets',{name:'Cash',type:'Cash',opening:0});
+    await addRecord('wallets',{name:'Bank',type:'Bank',opening:0});
+    await addRecord('wallets',{name:'UPI',type:'UPI',opening:0});
+    document.getElementById('wizardRoot').innerHTML='';
+    startApp();
+    toast('Welcome! Your business is set up.');
+  }
+};
+
+/* ============================================================
+   PIN LOCK
+   ============================================================ */
+const PinLock = {
+  entered:'',
+  show(onSuccess){
+    this.onSuccess=onSuccess; this.entered='';
+    document.getElementById('wizardRoot').innerHTML = `<div class="wizard-backdrop" style="justify-content:center;align-items:center;display:flex;">
+      <div class="wizard-inner" style="text-align:center;">
+        <div class="loading-logo" style="margin:0 auto;">${Util.initials(App.settings.bizName||'B')[0]}</div>
+        <h2 class="serif" style="margin-top:16px;">Enter PIN</h2>
+        <div class="pin-dots" id="pinDots">${'<div class="pin-dot"></div>'.repeat(4)}</div>
+        <div class="pin-pad" id="pinPad"></div>
+      </div></div>`;
+    this.renderPad();
+  },
+  renderPad(){
+    const keys=['1','2','3','4','5','6','7','8','9','','0','⌫'];
+    document.getElementById('pinPad').innerHTML = keys.map(k=>{
+      if(k==='') return `<div></div>`;
+      return `<button class="pin-key" onclick="PinLock.press('${k}')">${k}</button>`;
+    }).join('');
+  },
+  press(k){
+    if(k==='⌫'){ this.entered=this.entered.slice(0,-1); }
+    else if(this.entered.length<4){ this.entered+=k; }
+    document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled', i<this.entered.length));
+    if(this.entered.length===4){
+      setTimeout(()=>{
+        if(this.entered===App.settings.pin){
+          document.getElementById('wizardRoot').innerHTML='';
+          this.onSuccess();
+        } else {
+          toast('Incorrect PIN'); this.entered='';
+          document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('filled'));
+        }
+      },150);
+    }
+  }
+};
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+const Views = {};
+
+function businessHealth(){
+  const cash = totalCash();
+  const pending = C('events').reduce((s,e)=>s+Math.max(0,(Number(e.contractAmount)||0)-eventReceived(e.id)),0);
+  const payable = C('suppliers').reduce((s,sup)=>s+supplierOutstanding(sup.id),0) + C('workers').reduce((s,w)=>s+workerPendingWage(w.id),0);
+  return { cash, pending, payable, health: cash+pending-payable };
+}
+
+Views.notfound = ()=> `<div class="empty"><div class="empty-icon">🌸</div><div class="empty-title">Coming up</div></div>`;
+
+Views.dashboard = function(){
+  const now = Date.now();
+  const monthEvents = C('events').filter(e=>e.eventDate && Util.isThisMonth(Util.toTS(e.eventDate)));
+  const todayExpense = C('expenses').filter(e=>Util.isToday(Util.toTS(e.date))).reduce((s,e)=>s+e.amount,0)
+    + C('workerPayments').filter(w=>Util.isToday(Util.toTS(w.date))).reduce((s,w)=>s+w.amount,0);
+  const todayRevenue = C('payments').filter(p=>Util.isToday(Util.toTS(p.date))).reduce((s,p)=>s+p.amount,0);
+  const monthRevenue = C('payments').filter(p=>Util.isThisMonth(Util.toTS(p.date))).reduce((s,p)=>s+p.amount,0);
+  const monthExpense = C('expenses').filter(e=>Util.isThisMonth(Util.toTS(e.date))).reduce((s,e)=>s+e.amount,0)
+    + C('workerPayments').filter(w=>Util.isThisMonth(Util.toTS(w.date))).reduce((s,w)=>s+w.amount,0);
+  const grossProfit = monthRevenue - monthExpense;
+  const totalInvestment = C('partnerTx').filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
+  const totalWithdrawal = C('partnerTx').filter(t=>t.type==='withdrawal').reduce((s,t)=>s+t.amount,0);
+  const netProfit = C('events').reduce((s,e)=>s+eventProfit(e),0);
+  const bh = businessHealth();
+  const upcoming = Util.sortByDateDesc(C('events').filter(e=>e.eventDate && Util.toTS(e.eventDate)>=now && e.status!=='Closed'), 'eventDate').reverse().slice(0,4);
+  const completed = C('events').filter(e=>e.status==='Completed'||e.status==='Closed').length;
+  const inUse = C('resources').filter(r=>r.status==='In Use'||r.status==='Reserved').length;
+
+  return `
+    <div class="hero-arch">
+      <div class="hero-eyebrow">Business Health</div>
+      <div class="hero-figure">${Util.money(bh.health)}</div>
+      <div class="hero-label">Cash + Pending Collections minus Payables</div>
+      <div class="hero-grid">
+        <div class="hero-stat"><div class="v">${Util.money(bh.cash)}</div><div class="l">Current Cash</div></div>
+        <div class="hero-stat"><div class="v">${Util.money(bh.pending)}</div><div class="l">Pending Collection</div></div>
+        <div class="hero-stat"><div class="v">${Util.money(bh.payable)}</div><div class="l">Outstanding Payables</div></div>
+        <div class="hero-stat"><div class="v">${Util.money(netProfit)}</div><div class="l">Net Profit (All Events)</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Today</div>
+    <div class="stat-grid">
+      <div class="stat-card ok"><div class="v">${Util.money(todayRevenue)}</div><div class="l">Revenue</div></div>
+      <div class="stat-card warn"><div class="v">${Util.money(todayExpense)}</div><div class="l">Expense</div></div>
+    </div>
+
+    <div class="section-label">This Month</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="v">${Util.money(monthRevenue)}</div><div class="l">Revenue</div></div>
+      <div class="stat-card"><div class="v">${Util.money(monthExpense)}</div><div class="l">Expense</div></div>
+      <div class="stat-card ${grossProfit>=0?'ok':'danger'}"><div class="v">${Util.money(grossProfit)}</div><div class="l">Gross Profit</div></div>
+      <div class="stat-card"><div class="v">${monthEvents.length}</div><div class="l">Events This Month</div></div>
+    </div>
+
+    <div class="section-label">Partners</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="v">${Util.money(totalInvestment)}</div><div class="l">Total Invested</div></div>
+      <div class="stat-card"><div class="v">${Util.money(totalWithdrawal)}</div><div class="l">Total Withdrawn</div></div>
+    </div>
+
+    <div class="section-label">Snapshot</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="v">${completed}</div><div class="l">Completed Events</div></div>
+      <div class="stat-card"><div class="v">${inUse}</div><div class="l">Resources In Use</div></div>
+    </div>
+
+    <div class="section-label">Upcoming Events <a onclick="Nav.go('events')">View all</a></div>
+    ${upcoming.length? upcoming.map(e=>EventsUI.row(e)).join('') : `<div class="empty" style="padding:28px 20px;"><div class="empty-icon">📅</div><div class="empty-title">No upcoming events</div><div class="empty-sub">Book your next event to see it here.</div><button class="btn btn-primary" onclick="EventsUI.openForm()">+ New Event</button></div>`}
+
+    <div class="section-label">Revenue vs Expense</div>
+    <div class="card"><canvas id="dashChart" height="160"></canvas></div>
+  `;
+};
+
+const _origGo = Nav.go;
+Nav.go = function(view, params){
+  _origGo(view, params);
+  if(view==='dashboard') setTimeout(drawDashChart, 30);
+};
+let _dashChartInst=null;
+function drawDashChart(){
+  const el = document.getElementById('dashChart'); if(!el || typeof Chart==='undefined') return;
+  const months = [];
+  for(let i=5;i>=0;i--){ const d=new Date(); d.setMonth(d.getMonth()-i); months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')); }
+  const labels = months.map(m=>{ const [y,mo]=m.split('-'); return new Date(y,mo-1).toLocaleDateString('en-IN',{month:'short'}); });
+  const rev = months.map(m=>C('payments').filter(p=>Util.monthKey(Util.toTS(p.date))===m).reduce((s,p)=>s+p.amount,0));
+  const exp = months.map(m=>C('expenses').filter(e=>Util.monthKey(Util.toTS(e.date))===m).reduce((s,e)=>s+e.amount,0)
+    + C('workerPayments').filter(w=>Util.monthKey(Util.toTS(w.date))===m).reduce((s,w)=>s+w.amount,0));
+  if(_dashChartInst) _dashChartInst.destroy();
+  const styles=getComputedStyle(document.body);
+  _dashChartInst = new Chart(el, { type:'bar', data:{ labels, datasets:[
+    {label:'Revenue', data:rev, backgroundColor: styles.getPropertyValue('--gold')||'#C9A15A', borderRadius:6},
+    {label:'Expense', data:exp, backgroundColor: styles.getPropertyValue('--plum')||'#4A1942', borderRadius:6},
+  ]}, options:{ responsive:true, plugins:{legend:{labels:{color:styles.getPropertyValue('--ink')}}}, scales:{
+    x:{ticks:{color:styles.getPropertyValue('--ink-soft')},grid:{display:false}},
+    y:{ticks:{color:styles.getPropertyValue('--ink-soft')},grid:{color:styles.getPropertyValue('--line')}}
+  }}});
+}
+
+/* ============================================================
+   EVENTS MODULE
+   ============================================================ */
+const EVENT_TIMELINE = ['Booked','Advance Received','Planning','Resource Ready','Decoration Started','Event Running','Completed','Payment Pending','Closed'];
+const EventsUI = {
+  filter:'All', query:'',
+  statusChip(status){
+    const map={Booked:'neutral','Advance Received':'plum',Planning:'neutral','Resource Ready':'neutral','Decoration Started':'warn','Event Running':'warn',Completed:'ok','Payment Pending':'danger',Closed:'ok'};
+    return `<span class="chip ${map[status]||'neutral'}">${Util.esc(status||'Booked')}</span>`;
+  },
+  row(e){
+    const received = eventReceived(e.id); const pending = Math.max(0,(Number(e.contractAmount)||0)-received);
+    return `<div class="list-row" onclick="Nav.go('eventDetail',{id:'${e.id}'})">
+      <div class="avatar">🎉</div>
+      <div class="row-main"><div class="row-title">${Util.esc(e.title||'Untitled Event')}</div>
+        <div class="row-sub">${Util.esc(e.customerName||'')} · ${Util.dateShort(Util.toTS(e.eventDate))}</div></div>
+      <div class="row-end">${this.statusChip(e.status)}<div class="row-amt" style="margin-top:3px;">${pending>0?Util.money(pending)+' due':Util.money(e.contractAmount)}</div></div>
+    </div>`;
+  },
+  list(){
+    let items = C('events').filter(e=>!e.archived);
+    if(this.filter!=='All') items = items.filter(e=>e.status===this.filter);
+    if(this.query){ const q=this.query.toLowerCase(); items = items.filter(e=>(e.title||'').toLowerCase().includes(q)||(e.customerName||'').toLowerCase().includes(q)); }
+    return Util.sortByDateDesc(items,'eventDate');
+  },
+  fields(){
+    return [
+      {key:'title',label:'Event Name',required:true,placeholder:'e.g. Aaris and Fouziya Wedding'},
+      {key:'customerName',label:'Customer Name',required:true},
+      {key:'customerPhone',label:'Phone',type:'tel',required:true},
+      {key:'customerWhatsapp',label:'WhatsApp Number',type:'tel'},
+      {key:'location',label:'Venue / Location'},
+      {key:'mapLink',label:'Google Map Link (optional)'},
+      {key:'bookingDate',label:'Booking Date',type:'date',default:Util.todayISO()},
+      {key:'eventDate',label:'Event Date',type:'date',required:true},
+      {key:'startTime',label:'Start Time',type:'time'},
+      {key:'endTime',label:'End Time',type:'time'},
+      {key:'contractAmount',label:'Contract Amount',type:'number',required:true},
+      {key:'priority',label:'Priority',type:'select',options:['Low','Medium','High'],default:'Medium'},
+      {key:'assignedPartnerId',label:'Assigned Partner',type:'select',options:()=>[{value:'',label:'— Unassigned —'},...C('partners').map(p=>({value:p.id,label:p.name}))]},
+      {key:'status',label:'Status',type:'select',options:EVENT_TIMELINE,default:'Booked'},
+      {key:'notes',label:'Notes',type:'textarea'},
+    ];
+  },
+  openForm(id){
+    const ev = id? findById('events',id) : null;
+    const fieldsHtml = this.fields().map(f=>renderField(f, ev? ev[f.key] : f.default)).join('');
+    openSheet((ev?'Edit ':'New ')+'Event', `<div>${fieldsHtml}</div>
+      <div class="form-actions">
+        ${ev?`<button class="btn btn-danger" onclick="EventsUI.remove('${ev.id}')">Delete</button>`:''}
+        <button class="btn btn-primary btn-block" onclick="EventsUI.save(${ev?`'${ev.id}'`:'null'})">Save Event</button>
+      </div>`);
+  },
+  async save(id){
+    if(!validateFields(this.fields())) return;
+    const obj = id? {...findById('events',id)} : {};
+    this.fields().forEach(f=>{ obj[f.key]=readFieldValue(f); });
+    let cust = C('customers').find(c=>c.phone===obj.customerPhone);
+    if(!cust && obj.customerPhone){ cust = await addRecord('customers',{name:obj.customerName,phone:obj.customerPhone,whatsapp:obj.customerWhatsapp}); }
+    obj.customerId = cust? cust.id : obj.customerId;
+    if(id) await updateRecord('events',obj); else await addRecord('events',obj);
+    closeSheet(); toast('Event saved');
+    Nav.go('eventDetail', {id:obj.id, tab: App.view==='eventDetail'? App.viewParams.tab : undefined});
+  },
+  remove(id){
+    confirmDialog('Delete event?','This removes the event and its linked payments, expenses, reservations and attendance records. This cannot be undone.', async ()=>{
+      for(const store of ['payments','expenses','reservations','attendance','workerPayments']){
+        for(const x of C(store).filter(x=>x.eventId===id)){ await deleteRecord(store,x.id); }
+      }
+      await removeLedgerByRef('event',id);
+      await deleteRecord('events',id);
+      closeSheet(); toast('Event deleted'); Nav.go('events');
+    });
+  },
+  async duplicate(id){
+    const ev = {...findById('events',id)};
+    delete ev.id; delete ev.createdAt; delete ev.updatedAt;
+    ev.title = ev.title+' (Copy)'; ev.status='Booked';
+    const created = await addRecord('events',ev);
+    toast('Event duplicated'); Nav.go('eventDetail',{id:created.id});
+  },
+  archive(id){
+    confirmDialog('Archive event?','Archived events are hidden from the main list but not deleted.', async ()=>{
+      const ev={...findById('events',id)}; ev.archived=true; await updateRecord('events',ev);
+      toast('Event archived'); Nav.go('events');
+    }, 'Archive');
+  },
+  restore(id){ const ev={...findById('events',id)}; ev.archived=false; updateRecord('events',ev).then(()=>{ toast('Event restored'); Nav.go('eventDetail',{id}); }); },
+  setStatus(id,status){ const ev={...findById('events',id)}; ev.status=status; updateRecord('events',ev).then(()=>Nav.go('eventDetail',{id})); },
+  closeEvent(id){
+    const ev = findById('events',id);
+    const pending = Math.max(0,(Number(ev.contractAmount)||0)-eventReceived(id));
+    confirmDialog('Close this event?', pending>0? `There is ${Util.money(pending)} still pending from the customer. Closing will mark the event Closed and lock in final numbers.` : 'This will mark the event Closed and lock in final numbers.', async ()=>{
+      const e2={...ev}; e2.status='Closed'; await updateRecord('events',e2);
+      toast('Event closed'); Nav.go('eventDetail',{id});
+    }, 'Close Event');
+  },
+
+  openPaymentForm(eventId){
+    openSheet('Record Payment', `
+      <div class="field"><label>Date</label><input type="date" id="pDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Amount *</label><input type="number" id="pAmount"></div>
+      <div class="field"><label>Mode</label><select id="pMode">${['Cash','UPI','Bank','Cheque','Partner Paid'].map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div class="field"><label>Wallet</label><select id="pWallet">${walletOptions().map(w=>`<option value="${w.value}">${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Reference Number</label><input id="pRef"></div>
+      <div class="field"><label>Received By</label><input id="pBy"></div>
+      <div class="field"><label>Notes</label><textarea id="pNote"></textarea></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.savePayment('${eventId}')">Save Payment</button>`);
+  },
+  openPaymentEditForm(paymentId){
+    const p = findById('payments', paymentId);
+    if(!p){ toast('Payment not found'); return; }
+    openSheet('Edit Payment', `
+      <div class="field"><label>Date</label><input type="date" id="pDate" value="${Util.esc(p.date)}"></div>
+      <div class="field"><label>Amount *</label><input type="number" id="pAmount" value="${Util.esc(p.amount)}"></div>
+      <div class="field"><label>Mode</label><select id="pMode">${['Cash','UPI','Bank','Cheque','Partner Paid'].map(m=>`<option ${p.mode===m?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="field"><label>Wallet</label><select id="pWallet">${walletOptions().map(w=>`<option value="${w.value}" ${p.wallet===w.value?'selected':''}>${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Reference Number</label><input id="pRef" value="${Util.esc(p.ref||'')}"></div>
+      <div class="field"><label>Received By</label><input id="pBy" value="${Util.esc(p.receivedBy||'')}"></div>
+      <div class="field"><label>Notes</label><textarea id="pNote">${Util.esc(p.note||'')}</textarea></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.savePaymentEdit('${paymentId}')">Update Payment</button>`);
+  },
+  async savePayment(eventId){
+    const amount=Number(document.getElementById('pAmount').value)||0;
+    if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('pWallet').value;
+    const date=document.getElementById('pDate').value;
+    const p = await addRecord('payments',{eventId, customerId:findById('events',eventId).customerId, date, amount,
+      mode:document.getElementById('pMode').value, wallet:walletId, ref:document.getElementById('pRef').value,
+      receivedBy:document.getElementById('pBy').value, note:document.getElementById('pNote').value});
+    await addLedger({walletId, dir:'in', amount, date, category:'Customer Payment', refType:'payment', refId:p.id, note:'Event payment'});
+    const ev=findById('events',eventId);
+    if(ev.status==='Booked'){ const e2={...ev}; e2.status='Advance Received'; await updateRecord('events',e2); }
+    closeSheet(); toast('Payment recorded'); Nav.go('eventDetail',{id:eventId,tab:'payments'});
+  },
+  async savePaymentEdit(paymentId){
+    const p = findById('payments', paymentId);
+    if(!p){ toast('Payment not found'); return; }
+    const amount=Number(document.getElementById('pAmount').value)||0;
+    if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('pWallet').value;
+    const date=document.getElementById('pDate').value;
+    const updated = {...p,
+      date, amount, mode:document.getElementById('pMode').value, wallet:walletId,
+      ref:document.getElementById('pRef').value, receivedBy:document.getElementById('pBy').value,
+      note:document.getElementById('pNote').value };
+    await updateRecord('payments', updated);
+    await removeLedgerByRef('payment', paymentId);
+    await addLedger({walletId, dir:'in', amount, date, category:'Customer Payment', refType:'payment', refId:paymentId, note:'Event payment'});
+    closeSheet(); toast('Payment updated'); Nav.go('eventDetail',{id:p.eventId,tab:'payments'});
+  },
+  removeWorkerPayment(id,eventId){
+    confirmDialog('Delete worker payment?','This will remove the payment and its wallet entry.', async ()=>{
+      await removeLedgerByRef('workerPayment',id); await deleteRecord('workerPayments',id);
+      toast('Worker payment deleted'); Nav.go('eventDetail',{id:eventId,tab:'workers'});
+    });
+  },
+  removePayment(id,eventId){
+    confirmDialog('Delete payment?','This will remove the payment and its wallet entry.', async ()=>{
+      await removeLedgerByRef('payment',id); await deleteRecord('payments',id);
+      toast('Payment deleted'); Nav.go('eventDetail',{id:eventId,tab:'payments'});
+    });
+  },
+
+  openReserveForm(eventId){
+    const opts = C('resources').map(r=>{ const avail=(Number(r.qty)||0)-reservedQty(r.id); return {value:r.id,label:`${r.name} (${avail} free)`}; });
+    if(!opts.length){ toast('Add resources first'); return; }
+    openSheet('Reserve Resource', `
+      <div class="field"><label>Resource</label><select id="rvRes">${opts.map(o=>`<option value="${o.value}">${Util.esc(o.label)}</option>`).join('')}</select></div>
+      <div class="field"><label>Quantity</label><input type="number" id="rvQty" value="1"></div>
+      <div class="field"><label>Pickup / Use Date</label><input type="date" id="rvDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Expected Return Date</label><input type="date" id="rvReturn"></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.saveReserve('${eventId}')">Reserve</button>`);
+  },
+  async saveReserve(eventId){
+    const resourceId=document.getElementById('rvRes').value;
+    const qty=Number(document.getElementById('rvQty').value)||1;
+    const r=findById('resources',resourceId);
+    const avail=(Number(r.qty)||0)-reservedQty(resourceId);
+    if(qty>avail){ toast(`Only ${avail} available`); return; }
+    await addRecord('reservations',{eventId, resourceId, qty, date:document.getElementById('rvDate').value,
+      returnDate:document.getElementById('rvReturn').value, returnedQty:0, status:'reserved'});
+    const r2={...r}; r2.status='Reserved'; await updateRecord('resources',r2);
+    closeSheet(); toast('Resource reserved'); Nav.go('eventDetail',{id:eventId,tab:'resources'});
+  },
+  returnReservation(id,eventId){
+    confirmDialog('Mark as returned?','This restores the resource quantity back to available stock.', async ()=>{
+      const r=findById('reservations',id); const r2={...r}; r2.status='returned'; r2.returnedQty=r2.qty; await updateRecord('reservations',r2);
+      const res=findById('resources',r.resourceId);
+      if(reservedQty(r.resourceId)===0){ const res2={...res}; res2.status='Available'; await updateRecord('resources',res2); }
+      toast('Resource returned'); Nav.go('eventDetail',{id:eventId,tab:'resources'});
+    }, 'Mark Returned');
+  },
+
+  openAssignWorkerForm(eventId){
+    if(!C('workers').length){ toast('Add workers first'); return; }
+    openSheet('Assign Worker', `
+      <div class="field"><label>Worker</label><select id="awWorker">${C('workers').map(w=>`<option value="${w.id}">${Util.esc(w.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Date</label><input type="date" id="awDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Attendance</label><select id="awStatus">${['present','half','absent','late'].map(s=>`<option value="${s}">${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}</select></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.saveAttendance('${eventId}')">Save</button>`);
+  },
+  async saveAttendance(eventId){
+    await addRecord('attendance',{eventId, workerId:document.getElementById('awWorker').value,
+      date:document.getElementById('awDate').value, status:document.getElementById('awStatus').value});
+    closeSheet(); toast('Attendance recorded'); Nav.go('eventDetail',{id:eventId,tab:'workers'});
+  },
+  removeAttendance(id,eventId){ confirmDialog('Remove attendance entry?','This deletes this attendance record.', async ()=>{ await deleteRecord('attendance',id); toast('Removed'); Nav.go('eventDetail',{id:eventId,tab:'workers'}); }); },
+
+  openWorkerPayForm(eventId){
+    if(!C('workers').length){ toast('Add workers first'); return; }
+    openSheet('Pay Worker', `
+      <div class="field"><label>Worker</label><select id="wpWorker">${C('workers').map(w=>`<option value="${w.id}">${Util.esc(w.name)} — pending ${Util.money(workerPendingWage(w.id))}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount *</label><input type="number" id="wpAmount"></div>
+      <div class="field"><label>Date</label><input type="date" id="wpDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Wallet</label><select id="wpWallet">${walletOptions().map(w=>`<option value="${w.value}">${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Paid By</label><input id="wpBy"></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.saveWorkerPay('${eventId}')">Save Payment</button>`);
+  },
+  openWorkerPayEditForm(paymentId){
+    const wp = findById('workerPayments', paymentId);
+    if(!wp){ toast('Worker payment not found'); return; }
+    openSheet('Edit Worker Payment', `
+      <div class="field"><label>Worker</label><select id="wpWorker">${C('workers').map(w=>`<option value="${w.id}" ${w.id===wp.workerId?'selected':''}>${Util.esc(w.name)} — pending ${Util.money(workerPendingWage(w.id))}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount *</label><input type="number" id="wpAmount" value="${Util.esc(wp.amount)}"></div>
+      <div class="field"><label>Date</label><input type="date" id="wpDate" value="${Util.esc(wp.date)}"></div>
+      <div class="field"><label>Wallet</label><select id="wpWallet">${walletOptions().map(w=>`<option value="${w.value}" ${wp.wallet===w.value?'selected':''}>${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Paid By</label><input id="wpBy" value="${Util.esc(wp.paidBy||'')}"></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.saveWorkerPayEdit('${paymentId}')">Update Payment</button>`);
+  },
+  async saveWorkerPay(eventId){
+    const amount=Number(document.getElementById('wpAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('wpWallet').value; const date=document.getElementById('wpDate').value;
+    const wp=await addRecord('workerPayments',{eventId, workerId:document.getElementById('wpWorker').value, amount, date, wallet:walletId, paidBy:document.getElementById('wpBy').value});
+    await addLedger({walletId, dir:'out', amount, date, category:'Worker Wage', refType:'workerPayment', refId:wp.id, note:'Worker wage payment'});
+    closeSheet(); toast('Worker paid'); Nav.go('eventDetail',{id:eventId,tab:'workers'});
+  },
+  async saveWorkerPayEdit(paymentId){
+    const wp = findById('workerPayments', paymentId);
+    if(!wp){ toast('Worker payment not found'); return; }
+    const amount=Number(document.getElementById('wpAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('wpWallet').value; const date=document.getElementById('wpDate').value;
+    const updated = {...wp, workerId:document.getElementById('wpWorker').value, amount, date, wallet:walletId, paidBy:document.getElementById('wpBy').value};
+    await updateRecord('workerPayments', updated);
+    await removeLedgerByRef('workerPayment', paymentId);
+    await addLedger({walletId, dir:'out', amount, date, category:'Worker Wage', refType:'workerPayment', refId:paymentId, note:'Worker wage payment'});
+    closeSheet(); toast('Worker payment updated'); Nav.go('eventDetail',{id:wp.eventId,tab:'workers'});
+  },
+
+  openPhotoUpload(eventId){
+    openSheet('Add Photo', `<div class="field"><label>Choose Photo</label><input type="file" accept="image/*" id="evPhotoFile"></div>
+      <button class="btn btn-primary btn-block" onclick="EventsUI.savePhoto('${eventId}')">Add</button>`);
+  },
+  savePhoto(eventId){
+    const file=document.getElementById('evPhotoFile').files[0]; if(!file){ toast('Choose a photo'); return; }
+    const reader=new FileReader();
+    reader.onload=async()=>{
+      const ev={...findById('events',eventId)}; ev.photos=ev.photos||[]; ev.photos.push(reader.result);
+      await updateRecord('events',ev); closeSheet(); toast('Photo added'); Nav.go('eventDetail',{id:eventId,tab:'photos'});
+    };
+    reader.readAsDataURL(file);
+  },
+  removePhoto(eventId,idx){
+    const ev={...findById('events',eventId)}; ev.photos.splice(idx,1);
+    updateRecord('events',ev).then(()=>Nav.go('eventDetail',{id:eventId,tab:'photos'}));
+  },
+  printEvent(id){ Nav.go('eventDetail',{id}); setTimeout(()=>window.print(),200); }
+};
+
+Views.events = function(){
+  const filters=['All',...EVENT_TIMELINE];
+  return `
+    <div class="view-title">Events</div>
+    <div class="view-sub">${C('events').filter(e=>!e.archived).length} total events</div>
+    <div class="search-bar">
+      <input placeholder="Search events or customers…" value="${Util.esc(EventsUI.query)}" oninput="EventsUI.query=this.value; Views.refreshEvents();">
+    </div>
+    <div class="tabs">${filters.map(f=>`<div class="tab ${EventsUI.filter===f?'active':''}" onclick="EventsUI.filter='${f}'; Views.refreshEvents();">${f}</div>`).join('')}</div>
+    <div id="eventsListWrap">${EventsUI.list().length? EventsUI.list().map(e=>EventsUI.row(e)).join('') : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter, or add your first event.</div><button class="btn btn-primary" onclick="EventsUI.openForm()">+ New Event</button></div>`}</div>
+  `;
+};
+Views.refreshEvents = function(){
+  document.getElementById('eventsListWrap').innerHTML = EventsUI.list().length? EventsUI.list().map(e=>EventsUI.row(e)).join('') : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">No events found</div></div>`;
+};
+
+Views.eventDetail = function(params){
+  const ev = findById('events', params.id);
+  if(!ev) return `<div class="empty"><div class="empty-icon">🌸</div><div class="empty-title">Event not found</div></div>`;
+  const tab = params.tab || 'overview';
+  const received = eventReceived(ev.id); const expense = eventExpenses(ev.id);
+  const pending = Math.max(0,(Number(ev.contractAmount)||0)-received);
+  const profit = eventProfit(ev);
+  const tabs=[['overview','Overview'],['payments','Payments'],['expenses','Expenses'],['resources','Resources'],['workers','Workers'],['photos','Photos & Docs']];
+
+  let body='';
+  if(tab==='overview'){
+    body = `
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><div class="row-title" style="font-size:16px;">${Util.esc(ev.customerName)}</div><div class="row-sub">${Util.esc(ev.customerPhone||'')}</div></div>
+        ${EventsUI.statusChip(ev.status)}
+      </div>
+      <div class="divider"></div>
+      <div class="row-sub">📍 ${Util.esc(ev.location||'No location set')}</div>
+      ${ev.mapLink?`<div class="row-sub"><a class="link" href="${Util.esc(ev.mapLink)}" target="_blank">Open in Maps</a></div>`:''}
+      <div class="row-sub">📅 ${Util.date(Util.toTS(ev.eventDate))} ${ev.startTime?('· '+ev.startTime+(ev.endTime?'–'+ev.endTime:'')):''}</div>
+      <div class="row-sub">Priority: ${Util.esc(ev.priority||'Medium')} · Partner: ${Util.esc((findById('partners',ev.assignedPartnerId)||{}).name||'Unassigned')}</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="v">${Util.money(ev.contractAmount)}</div><div class="l">Contract Amount</div></div>
+        <div class="stat-card ok"><div class="v">${Util.money(received)}</div><div class="l">Received</div></div>
+        <div class="stat-card ${pending>0?'warn':'ok'}"><div class="v">${Util.money(pending)}</div><div class="l">Pending Balance</div></div>
+        <div class="stat-card ${profit>=0?'ok':'danger'}"><div class="v">${Util.money(profit)}</div><div class="l">Profit So Far</div></div>
+      </div>
+      <div class="section-label">Move Timeline</div>
+      <div class="tag-row">${EVENT_TIMELINE.map(s=>`<div class="tag-opt ${ev.status===s?'sel':''}" onclick="EventsUI.setStatus('${ev.id}','${s}')">${s}</div>`).join('')}</div>
+      ${ev.notes?`<div class="section-label">Notes</div><div class="card">${Util.esc(ev.notes)}</div>`:''}
+      <div class="section-label">Actions</div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn btn-ghost btn-block" onclick="EventsUI.openForm('${ev.id}')">✏️ Edit Event</button>
+        <button class="btn btn-ghost btn-block" onclick="EventsUI.duplicate('${ev.id}')">📄 Duplicate</button>
+        <button class="btn btn-ghost btn-block" onclick="EventsUI.printEvent('${ev.id}')">🖨️ Print / PDF</button>
+        ${ev.archived? `<button class="btn btn-ghost btn-block" onclick="EventsUI.restore('${ev.id}')">↩️ Restore</button>` : `<button class="btn btn-ghost btn-block" onclick="EventsUI.archive('${ev.id}')">🗄️ Archive</button>`}
+        ${ev.status!=='Closed'?`<button class="btn btn-gold btn-block" onclick="EventsUI.closeEvent('${ev.id}')">✅ Close Event</button>`:''}
+        <button class="btn btn-danger btn-block" onclick="EventsUI.remove('${ev.id}')">🗑️ Delete Event</button>
+      </div>`;
+  } else if(tab==='payments'){
+    const pays = Util.sortByDateDesc(C('payments').filter(p=>p.eventId===ev.id),'date');
+    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openPaymentForm('${ev.id}')">+ Record Payment</button><div style="height:12px"></div>`
+      + (pays.length? pays.map(p=>`<div class="list-row" onclick="EventsUI.removePayment('${p.id}','${ev.id}')">
+          <div class="avatar">💵</div><div class="row-main"><div class="row-title">${Util.money(p.amount)}</div><div class="row-sub">${Util.esc(p.mode||'')} · ${Util.date(Util.toTS(p.date))}</div></div>
+          <div class="row-end"><span class="chip neutral">${Util.esc((findById('wallets',p.wallet)||{}).name||'')}</span></div></div>`).join('')
+        : `<div class="empty"><div class="empty-icon">💵</div><div class="empty-title">No payments yet</div></div>`);
+  } else if(tab==='expenses'){
+    const exps = Util.sortByDateDesc(C('expenses').filter(e=>e.eventId===ev.id),'date');
+    body = `<button class="btn btn-primary btn-block" onclick="ExpensesUI.openForm(null,'${ev.id}')">+ Add Expense</button><div style="height:12px"></div>`
+      + (exps.length? exps.map(e=>`<div class="list-row" onclick="ExpensesUI.openForm('${e.id}','${ev.id}')">
+          <div class="avatar">🧾</div><div class="row-main"><div class="row-title">${Util.esc(e.category)}</div><div class="row-sub">${Util.date(Util.toTS(e.date))}</div></div>
+          <div class="row-end"><div class="row-amt">${Util.money(e.amount)}</div></div></div>`).join('')
+        : `<div class="empty"><div class="empty-icon">🧾</div><div class="empty-title">No expenses logged</div></div>`);
+  } else if(tab==='resources'){
+    const rsv = C('reservations').filter(r=>r.eventId===ev.id);
+    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openReserveForm('${ev.id}')">+ Reserve Resource</button><div style="height:12px"></div>`
+      + (rsv.length? rsv.map(r=>{ const res=findById('resources',r.resourceId)||{name:'Deleted'};
+          return `<div class="list-row">
+          <div class="avatar">🎪</div><div class="row-main"><div class="row-title">${Util.esc(res.name)}</div><div class="row-sub">Qty ${r.qty} · ${r.status==='returned'?'Returned':'Out'} · ${Util.dateShort(Util.toTS(r.date))}</div></div>
+          <div class="row-end">${r.status!=='returned'?`<button class="btn btn-ghost btn-sm" onclick="EventsUI.returnReservation('${r.id}','${ev.id}')">Return</button>`:'<span class="chip ok">Returned</span>'}</div></div>`;
+        }).join('') : `<div class="empty"><div class="empty-icon">🎪</div><div class="empty-title">No resources reserved</div></div>`);
+  } else if(tab==='workers'){
+    const att = Util.sortByDateDesc(C('attendance').filter(a=>a.eventId===ev.id),'date');
+    const pays = Util.sortByDateDesc(C('workerPayments').filter(p=>p.eventId===ev.id),'date');
+    body = `<div class="tag-row" style="margin-bottom:12px;">
+        <button class="btn btn-primary btn-sm" onclick="EventsUI.openAssignWorkerForm('${ev.id}')">+ Attendance</button>
+        <button class="btn btn-gold btn-sm" onclick="EventsUI.openWorkerPayForm('${ev.id}')">+ Pay Worker</button>
+      </div>
+      <div class="section-label">Attendance</div>
+      ${att.length? att.map(a=>{ const w=findById('workers',a.workerId)||{name:'Deleted'};
+        return `<div class="list-row" onclick="EventsUI.removeAttendance('${a.id}','${ev.id}')">
+        <div class="avatar">👷</div><div class="row-main"><div class="row-title">${Util.esc(w.name)}</div><div class="row-sub">${Util.dateShort(Util.toTS(a.date))}</div></div>
+        <div class="row-end"><span class="chip neutral">${a.status}</span></div></div>`; }).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No attendance recorded</div></div>`}
+      <div class="section-label">Payments</div>
+      ${pays.length? pays.map(p=>{ const w=findById('workers',p.workerId)||{name:'Deleted'};
+        return `<div class="list-row"><div class="avatar">💸</div><div class="row-main"><div class="row-title">${Util.esc(w.name)}</div><div class="row-sub">${Util.dateShort(Util.toTS(p.date))}</div></div>
+        <div class="row-end"><div class="row-amt">${Util.money(p.amount)}</div></div></div>`; }).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No worker payments</div></div>`}`;
+  } else if(tab==='photos'){
+    const photos = ev.photos||[];
+    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openPhotoUpload('${ev.id}')">+ Add Photo</button><div style="height:12px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${photos.map((p,i)=>`<div style="position:relative;"><img src="${p}" style="width:100%;height:120px;object-fit:cover;border-radius:12px;"><button class="icon-btn" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.5);color:#fff;border:none;" onclick="EventsUI.removePhoto('${ev.id}',${i})">✕</button></div>`).join('')}</div>
+      ${!photos.length?`<div class="empty"><div class="empty-icon">📷</div><div class="empty-title">No photos yet</div></div>`:''}
+      <div class="section-label">Agreement / Document Notes</div>
+      <div class="card muted" style="font-size:13px;">${ev.notes? Util.esc(ev.notes) : 'Add agreement references or document notes from Edit Event → Notes.'}</div>`;
+  }
+
+  return `
+    <div class="view-title">${Util.esc(ev.title||'Event')}</div>
+    <div class="view-sub">${Util.date(Util.toTS(ev.eventDate))} · ${Util.esc(ev.status)}</div>
+    <div class="tabs">${tabs.map(([k,l])=>`<div class="tab ${tab===k?'active':''}" onclick="Nav.go('eventDetail',{id:'${ev.id}',tab:'${k}'})">${l}</div>`).join('')}</div>
+    ${body}
+  `;
+};
+
+/* ============================================================
+   FINANCE MODULE
+   ============================================================ */
+const FinanceUI = {
+  tab:'wallets',
+  openWalletForm(id){ Entities.wallets.openForm(id); },
+  openTxForm(){ this.openTransferForm(); },
+  openTransferForm(){
+    if(C('wallets').length<2){ toast('Add at least two wallets first'); return; }
+    openSheet('Transfer Between Wallets', `
+      <div class="field"><label>From Wallet</label><select id="tfFrom">${walletOptions().map(w=>`<option value="${w.value}">${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>To Wallet</label><select id="tfTo">${walletOptions().map(w=>`<option value="${w.value}">${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount *</label><input type="number" id="tfAmount"></div>
+      <div class="field"><label>Date</label><input type="date" id="tfDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Note</label><input id="tfNote"></div>
+      <button class="btn btn-primary btn-block" onclick="FinanceUI.saveTransfer()">Transfer</button>`);
+  },
+  async saveTransfer(){
+    const from=document.getElementById('tfFrom').value, to=document.getElementById('tfTo').value;
+    const amount=Number(document.getElementById('tfAmount').value)||0;
+    if(from===to){ toast('Choose two different wallets'); return; }
+    if(amount<=0){ toast('Enter a valid amount'); return; }
+    const date=document.getElementById('tfDate').value, note=document.getElementById('tfNote').value;
+    const refId=Util.uid();
+    await addLedger({walletId:from,dir:'out',amount,date,category:'Transfer Out',refType:'transfer',refId,note});
+    await addLedger({walletId:to,dir:'in',amount,date,category:'Transfer In',refType:'transfer',refId,note});
+    closeSheet(); toast('Transfer complete'); Nav.go('finance');
+  },
+  openPartnerTxForm(type, partnerId){
+    const partners = C('partners');
+    openSheet(type==='investment'?'Record Investment':'Record Withdrawal', `
+      <div class="field"><label>Partner</label><select id="ptPartner">${partners.map(p=>`<option value="${p.id}" ${p.id===partnerId?'selected':''}>${Util.esc(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount *</label><input type="number" id="ptAmount"></div>
+      <div class="field"><label>Date</label><input type="date" id="ptDate" value="${Util.todayISO()}"></div>
+      <div class="field"><label>Wallet</label><select id="ptWallet">${walletOptions().map(w=>`<option value="${w.value}">${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Notes</label><textarea id="ptNote"></textarea></div>
+      <button class="btn btn-primary btn-block" onclick="FinanceUI.savePartnerTx('${type}')">Save</button>`);
+  },
+  openPartnerTxEditForm(txId){
+    const tx = findById('partnerTx', txId);
+    if(!tx){ toast('Transaction not found'); return; }
+    const partners = C('partners');
+    openSheet(tx.type==='investment'?'Edit Investment':'Edit Withdrawal', `
+      <div class="field"><label>Partner</label><select id="ptPartner">${partners.map(p=>`<option value="${p.id}" ${p.id===tx.partnerId?'selected':''}>${Util.esc(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Amount *</label><input type="number" id="ptAmount" value="${Util.esc(tx.amount)}"></div>
+      <div class="field"><label>Date</label><input type="date" id="ptDate" value="${Util.esc(tx.date)}"></div>
+      <div class="field"><label>Wallet</label><select id="ptWallet">${walletOptions().map(w=>`<option value="${w.value}" ${tx.wallet===w.value?'selected':''}>${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Notes</label><textarea id="ptNote">${Util.esc(tx.note||'')}</textarea></div>
+      <button class="btn btn-primary btn-block" onclick="FinanceUI.savePartnerTxEdit('${txId}')">Update</button>`);
+  },
+  async savePartnerTx(type){
+    const amount=Number(document.getElementById('ptAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('ptWallet').value, date=document.getElementById('ptDate').value;
+    const partnerId=document.getElementById('ptPartner').value;
+    const rec = await addRecord('partnerTx',{partnerId,type,amount,date,wallet:walletId,note:document.getElementById('ptNote').value});
+    await addLedger({walletId, dir: type==='investment'?'in':'out', amount, date, category:type==='investment'?'Partner Investment':'Partner Withdrawal', refType:'partnerTx', refId:rec.id, note:''});
+    closeSheet(); toast('Saved'); Nav.go(App.view==='partnerProfile'?'partnerProfile':'finance', App.viewParams);
+  },
+  async savePartnerTxEdit(txId){
+    const tx = findById('partnerTx', txId);
+    if(!tx){ toast('Transaction not found'); return; }
+    const amount=Number(document.getElementById('ptAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('ptWallet').value, date=document.getElementById('ptDate').value;
+    const updated = {...tx, partnerId:document.getElementById('ptPartner').value, amount, date, wallet:walletId, note:document.getElementById('ptNote').value};
+    await updateRecord('partnerTx', updated);
+    await removeLedgerByRef('partnerTx', txId);
+    await addLedger({walletId, dir: tx.type==='investment'?'in':'out', amount, date, category:tx.type==='investment'?'Partner Investment':'Partner Withdrawal', refType:'partnerTx', refId:txId, note:''});
+    closeSheet(); toast('Transaction updated'); Nav.go(App.view==='partnerProfile'?'partnerProfile':'finance', App.viewParams);
+  },
+  removePartnerTx(id){
+    confirmDialog('Delete entry?','This removes the investment/withdrawal record and its wallet entry.', async ()=>{
+      await removeLedgerByRef('partnerTx',id); await deleteRecord('partnerTx',id);
+      toast('Deleted'); Nav.go(App.view, App.viewParams);
+    });
+  },
+  editLedgerEntry(id){
+    const entry = findById('ledger',id);
+    if(!entry){ toast('Entry not found'); return; }
+    if(entry.refType==='expense'){ return ExpensesUI.openForm(entry.refId); }
+    if(entry.refType==='payment'){ return EventsUI.openPaymentEditForm(entry.refId); }
+    if(entry.refType==='workerPayment'){ return EventsUI.openWorkerPayEditForm(entry.refId); }
+    if(entry.refType==='partnerTx'){ const tx = findById('partnerTx',entry.refId); if(tx){ return FinanceUI.openPartnerTxEditForm(tx.id); } }
+    if(entry.refType==='supplierPayment'){ const sp = findById('supplierPayments',entry.refId); if(sp){ return SupplierUI.openPayForm(sp.supplierId, entry.refId); } }
+    toast('Edit is not available for this activity type');
+  },
+  deleteLedgerEntry(id){
+    const entry = findById('ledger',id);
+    if(!entry){ toast('Entry not found'); return; }
+    confirmDialog('Delete activity entry?','This will remove the record and its ledger entry.', async ()=>{
+      if(entry.refType==='expense'){ return ExpensesUI.remove(entry.refId); }
+      if(entry.refType==='payment'){ const p = findById('payments',entry.refId); if(p){ return EventsUI.removePayment(entry.refId,p.eventId); } }
+      if(entry.refType==='workerPayment'){ const wp = findById('workerPayments',entry.refId); if(wp){ return EventsUI.removeWorkerPayment(entry.refId, wp.eventId); } }
+      if(entry.refType==='partnerTx'){ return FinanceUI.removePartnerTx(entry.refId); }
+      if(entry.refType==='supplierPayment'){ const sp = findById('supplierPayments',entry.refId); if(sp){ return SupplierUI.removePayment(entry.refId, sp.supplierId); } }
+      if(entry.refType==='transfer'){ await removeLedgerByRef('transfer', entry.refId); toast('Transfer removed'); Nav.go(App.view, App.viewParams); return; }
+      await deleteRecord('ledger',id);
+      toast('Activity deleted'); Nav.go(App.view, App.viewParams);
+    }, 'Delete');
+  }
+};
+
+Views.finance = function(){
+  const cash = totalCash();
+  const inflow30 = C('ledger').filter(l=>l.dir==='in' && Util.toTS(l.date)>Date.now()-30*86400000).reduce((s,l)=>s+l.amount,0);
+  const outflow30 = C('ledger').filter(l=>l.dir==='out' && Util.toTS(l.date)>Date.now()-30*86400000).reduce((s,l)=>s+l.amount,0);
+  const recent = Util.sortByDateDesc(C('ledger'),'date').slice(0,12);
+  return `
+    <div class="view-title">Finance</div>
+    <div class="view-sub">Current Cash Position</div>
+    <div class="hero-arch"><div class="hero-eyebrow">Total Across Wallets</div><div class="hero-figure">${Util.money(cash)}</div>
+      <div class="hero-grid"><div class="hero-stat"><div class="v">${Util.money(inflow30)}</div><div class="l">In (30 days)</div></div><div class="hero-stat"><div class="v">${Util.money(outflow30)}</div><div class="l">Out (30 days)</div></div></div>
+    </div>
+    <div class="tag-row" style="margin:14px 0;">
+      <button class="btn btn-gold btn-sm" onclick="FinanceUI.openTransferForm()">⇄ Transfer</button>
+      <button class="btn btn-ghost btn-sm" onclick="FinanceUI.openPartnerTxForm('investment')">+ Investment</button>
+      <button class="btn btn-ghost btn-sm" onclick="FinanceUI.openPartnerTxForm('withdrawal')">+ Withdrawal</button>
+      <button class="btn btn-ghost btn-sm" onclick="Entities.wallets.openForm()">+ Wallet</button>
+    </div>
+    <div class="section-label">Wallets</div>
+    ${Entities.wallets.render()}
+    <div class="section-label">Recent Activity</div>
+    ${recent.length? recent.map(l=>`<div class="list-row">
+      <div class="avatar">${l.dir==='in'?'⬇️':'⬆️'}</div>
+      <div class="row-main"><div class="row-title">${Util.esc(l.category)}</div><div class="row-sub">${Util.esc((findById('wallets',l.walletId)||{}).name||'')} · ${Util.dateShort(Util.toTS(l.date))}</div></div>
+      <div class="row-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="row-amt ${l.dir==='in'?'text-ok':'text-danger'}">${l.dir==='in'?'+':'-'}${Util.money(l.amount)}</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); FinanceUI.editLedgerEntry('${l.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); FinanceUI.deleteLedgerEntry('${l.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('') : `<div class="empty" style="padding:24px;"><div class="empty-sub">No transactions yet</div></div>`}
+  `;
+};
+
+/* ============================================================
+   EXPENSES MODULE
+   ============================================================ */
+const EXPENSE_CATEGORIES = ['Flowers','Workers','Fuel','Vehicle','Food','Printing','Marketing','Rent','Electricity','Decoration','Maintenance','Miscellaneous'];
+const ExpensesUI = {
+  query:'',
+  fields(eventId){
+    return [
+      {key:'date',label:'Date',type:'date',default:Util.todayISO()},
+      {key:'category',label:'Category',type:'select',options:EXPENSE_CATEGORIES,required:true},
+      {key:'amount',label:'Amount',type:'number',required:true},
+      {key:'wallet',label:'Wallet',type:'select',options:()=>walletOptions()},
+      {key:'paidBy',label:'Paid By'},
+      {key:'supplierId',label:'Supplier',type:'select',options:()=>[{value:'',label:'— None —'},...C('suppliers').map(s=>({value:s.id,label:s.name}))]},
+      {key:'partnerId',label:'Partner (if partner paid)',type:'select',options:()=>[{value:'',label:'— None —'},...C('partners').map(p=>({value:p.id,label:p.name}))]},
+      {key:'eventId',label:'Event',type:'select',options:()=>[{value:'',label:'— General Business —'},...C('events').map(e=>({value:e.id,label:e.title||'Untitled'}))],default:eventId||''},
+      {key:'billPhoto',label:'Bill Photo',type:'image'},
+      {key:'notes',label:'Notes',type:'textarea'},
+    ];
+  },
+  openForm(id, eventId){
+    const ex = id? findById('expenses',id) : null;
+    const flds = this.fields(eventId);
+    const fieldsHtml = flds.map(f=>renderField(f, ex? ex[f.key] : f.default)).join('');
+    openSheet((ex?'Edit ':'Add ')+'Expense', `<div>${fieldsHtml}</div>
+      <div class="form-actions">
+        ${ex?`<button class="btn btn-danger" onclick="ExpensesUI.remove('${ex.id}')">Delete</button>`:''}
+        <button class="btn btn-primary btn-block" onclick="ExpensesUI.save(${ex?`'${ex.id}'`:'null'})">Save Expense</button>
+      </div>`);
+  },
+  async save(id){
+    const flds = this.fields();
+    if(!validateFields(flds)) return;
+    const obj = id? {...findById('expenses',id)} : {};
+    flds.forEach(f=>{ obj[f.key]=readFieldValue(f); });
+    if(id){ await removeLedgerByRef('expense',id); await updateRecord('expenses',obj); }
+    else { const created = await addRecord('expenses',obj); obj.id = created.id; }
+    await addLedger({walletId:obj.wallet, dir:'out', amount:obj.amount, date:obj.date, category:'Expense: '+obj.category, refType:'expense', refId:obj.id, note:obj.notes||''});
+    closeSheet(); toast('Expense saved');
+    Nav.go(obj.eventId? 'eventDetail' : App.view, obj.eventId? {id:obj.eventId, tab:'expenses'} : App.viewParams);
+  },
+  remove(id){
+    const ex = findById('expenses',id);
+    confirmDialog('Delete expense?','This will remove the expense and its wallet entry.', async ()=>{
+      await removeLedgerByRef('expense',id); await deleteRecord('expenses',id);
+      closeSheet(); toast('Expense deleted');
+      Nav.go(ex.eventId?'eventDetail':'expenses', ex.eventId?{id:ex.eventId,tab:'expenses'}:{});
+    });
+  },
+  list(){
+    let items = C('expenses');
+    if(this.query){ const q=this.query.toLowerCase(); items = items.filter(e=>(e.category||'').toLowerCase().includes(q)||(e.notes||'').toLowerCase().includes(q)); }
+    return Util.sortByDateDesc(items,'date');
+  }
+};
+
+Views.expenses = function(){
+  const items = ExpensesUI.list();
+  const total = items.reduce((s,e)=>s+e.amount,0);
+  return `
+    <div class="view-title">Expenses</div>
+    <div class="view-sub">${Util.money(total)} total logged</div>
+    <div class="search-bar"><input placeholder="Search category or notes…" value="${Util.esc(ExpensesUI.query)}" oninput="ExpensesUI.query=this.value; Views.refreshExpenses();"></div>
+    <div id="expenseListWrap">${items.length? items.map(e=>`<div class="list-row" onclick="ExpensesUI.openForm('${e.id}')">
+      <div class="avatar">🧾</div><div class="row-main"><div class="row-title">${Util.esc(e.category)}</div><div class="row-sub">${Util.esc((findById('events',e.eventId)||{}).title||'General Business')} · ${Util.dateShort(Util.toTS(e.date))}</div></div>
+      <div class="row-end"><div class="row-amt">${Util.money(e.amount)}</div></div></div>`).join('') : `<div class="empty"><div class="empty-icon">🧾</div><div class="empty-title">No expenses logged</div><div class="empty-sub">Track fuel, flowers, workers and more.</div><button class="btn btn-primary" onclick="ExpensesUI.openForm()">+ Add Expense</button></div>`}</div>`;
+};
+Views.refreshExpenses = function(){
+  const items = ExpensesUI.list();
+  document.getElementById('expenseListWrap').innerHTML = items.length? items.map(e=>`<div class="list-row" onclick="ExpensesUI.openForm('${e.id}')">
+      <div class="avatar">🧾</div><div class="row-main"><div class="row-title">${Util.esc(e.category)}</div><div class="row-sub">${Util.esc((findById('events',e.eventId)||{}).title||'General Business')} · ${Util.dateShort(Util.toTS(e.date))}</div></div>
+      <div class="row-end"><div class="row-amt">${Util.money(e.amount)}</div></div></div>`).join('') : `<div class="empty"><div class="empty-title">No expenses found</div></div>`;
+};
+
+Views.resources = function(){
+  return `<div class="view-title">Resources</div><div class="view-sub">Assets and equipment for your events</div>
+    <div class="search-bar"><input placeholder="Search resources…" oninput="Views.resQuery=this.value; Views.refreshResources();"></div>
+    <div id="resListWrap">${Entities.resources.render(Views.resQuery)}</div>`;
+};
+Views.resQuery='';
+Views.refreshResources = function(){ document.getElementById('resListWrap').innerHTML = Entities.resources.render(Views.resQuery); };
+
+/* ============================================================
+   MORE MENU
+   ============================================================ */
+Views.more = function(){
+  const items = [
+    ['partners','🤝','Partners','Investment, withdrawals & profit share'],
+    ['customers','👥','Customers','Bookings, payments and statements'],
+    ['suppliers','🚚','Suppliers','Rentals, materials and payables'],
+    ['workers','👷','Workers','Attendance, wages and assignments'],
+    ['expenses','🧾','Expenses','All business and event costs'],
+    ['reports','📊','Reports','Revenue, profit and cash flow'],
+    ['backup','💾','Backup & Restore','Export or import your data'],
+    ['settings','⚙️','Settings','Business profile, theme & PIN'],
+  ];
+  return `<div class="view-title">More</div><div class="view-sub">Everything else in your business</div>
+    ${items.map(([v,icon,title,sub])=>`<div class="list-row" onclick="Nav.go('${v}')">
+      <div class="avatar">${icon}</div><div class="row-main"><div class="row-title">${title}</div><div class="row-sub">${sub}</div></div>
+      <div class="row-end muted">›</div></div>`).join('')}`;
+};
+Views.partners = function(){
+  return `<div class="view-title">Partners</div><div class="view-sub">Investment, withdrawals and profit share</div>
+    <div id="partnerListWrap">${Entities.partners.render()}</div>`;
+};
+Views.customers = function(){
+  return `<div class="view-title">Customers</div><div class="view-sub">${C('customers').length} customers</div>
+    <div class="search-bar"><input placeholder="Search customers…" oninput="Views.custQuery=this.value; Views.refreshCustomers();"></div>
+    <div id="custListWrap">${Entities.customers.render(Views.custQuery)}</div>`;
+};
+Views.custQuery='';
+Views.refreshCustomers=function(){ document.getElementById('custListWrap').innerHTML = Entities.customers.render(Views.custQuery); };
+Views.suppliers = function(){
+  return `<div class="view-title">Suppliers</div><div class="view-sub">${C('suppliers').length} suppliers</div>
+    <div class="search-bar"><input placeholder="Search suppliers…" oninput="Views.supQuery=this.value; Views.refreshSuppliers();"></div>
+    <div id="supListWrap">${Entities.suppliers.render(Views.supQuery)}</div>`;
+};
+Views.supQuery='';
+Views.refreshSuppliers=function(){ document.getElementById('supListWrap').innerHTML = Entities.suppliers.render(Views.supQuery); };
+Views.workers = function(){
+  return `<div class="view-title">Workers</div><div class="view-sub">${C('workers').length} workers</div>
+    <div class="search-bar"><input placeholder="Search workers…" oninput="Views.workQuery=this.value; Views.refreshWorkers();"></div>
+    <div id="workListWrap">${Entities.workers.render(Views.workQuery)}</div>`;
+};
+Views.workQuery='';
+Views.refreshWorkers=function(){ document.getElementById('workListWrap').innerHTML = Entities.workers.render(Views.workQuery); };
+Views.wallets = function(){
+  return `<div class="view-title">Wallets</div><div class="view-sub">Cash, bank, UPI and custom wallets</div>${Entities.wallets.render()}`;
+};
+
+/* ---------------- Partner Profile ---------------- */
+const PartnerUI = { openProfile(id){ Nav.go('partnerProfile',{id}); } };
+Views.partnerProfile = function(params){
+  const p = findById('partners',params.id);
+  if(!p) return `<div class="empty"><div class="empty-title">Partner not found</div></div>`;
+  const txs = Util.sortByDateDesc(C('partnerTx').filter(t=>t.partnerId===p.id),'date');
+  const inv = txs.filter(t=>t.type==='investment').reduce((s,t)=>s+t.amount,0);
+  const wd = txs.filter(t=>t.type==='withdrawal').reduce((s,t)=>s+t.amount,0);
+  const evContrib = C('events').filter(e=>e.assignedPartnerId===p.id);
+  const totalProfit = C('events').reduce((s,e)=>s+eventProfit(e),0);
+  const share = (Number(p.profitShare)||0)/100 * totalProfit;
+  return `<div class="view-title">${Util.esc(p.name)}</div><div class="view-sub">Partner Profile</div>
+    <div class="card"><div style="display:flex;gap:12px;align-items:center;">
+      <div class="avatar" style="width:56px;height:56px;">${p.photo?`<img src="${p.photo}">`:Util.initials(p.name)}</div>
+      <div><div class="row-title" style="font-size:16px;">${Util.esc(p.name)}</div><div class="row-sub">${Util.esc(p.phone||'')} · ${Util.esc(p.profitShare||0)}% share</div></div>
+    </div></div>
+    <div class="stat-grid">
+      <div class="stat-card ok"><div class="v">${Util.money(inv)}</div><div class="l">Total Invested</div></div>
+      <div class="stat-card warn"><div class="v">${Util.money(wd)}</div><div class="l">Total Withdrawn</div></div>
+      <div class="stat-card"><div class="v">${Util.money(share)}</div><div class="l">Profit Share (est.)</div></div>
+      <div class="stat-card"><div class="v">${evContrib.length}</div><div class="l">Events Handled</div></div>
+    </div>
+    <div class="tag-row" style="margin-bottom:12px;">
+      <button class="btn btn-primary btn-sm" onclick="FinanceUI.openPartnerTxForm('investment','${p.id}')">+ Investment</button>
+      <button class="btn btn-ghost btn-sm" onclick="FinanceUI.openPartnerTxForm('withdrawal','${p.id}')">+ Withdrawal</button>
+      <button class="btn btn-ghost btn-sm" onclick="Entities.partners.openForm('${p.id}')">Edit</button>
+    </div>
+    <div class="section-label">Investment & Withdrawal History</div>
+    ${txs.length? txs.map(t=>`<div class="list-row" onclick="FinanceUI.removePartnerTx('${t.id}')">
+      <div class="avatar">${t.type==='investment'?'⬇️':'⬆️'}</div><div class="row-main"><div class="row-title">${t.type==='investment'?'Investment':'Withdrawal'}</div><div class="row-sub">${Util.dateShort(Util.toTS(t.date))}</div></div>
+      <div class="row-end"><div class="row-amt ${t.type==='investment'?'text-ok':'text-warn'}">${Util.money(t.amount)}</div></div></div>`).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No transactions yet</div></div>`}
+    <div class="section-label">Event Contribution</div>
+    ${evContrib.length? evContrib.map(e=>EventsUI.row(e)).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No events assigned</div></div>`}`;
+};
+
+/* ---------------- Customer Profile ---------------- */
+Views.customerProfile = function(params){
+  const c = findById('customers',params.id);
+  if(!c) return `<div class="empty"><div class="empty-title">Customer not found</div></div>`;
+  const evs = Util.sortByDateDesc(C('events').filter(e=>e.customerId===c.id),'eventDate');
+  const totalRevenue = evs.reduce((s,e)=>s+eventReceived(e.id),0);
+  const pending = evs.reduce((s,e)=>s+Math.max(0,(Number(e.contractAmount)||0)-eventReceived(e.id)),0);
+  return `<div class="view-title">${Util.esc(c.name)}</div><div class="view-sub">Customer Profile</div>
+    <div class="card"><div style="display:flex;gap:12px;align-items:center;">
+      <div class="avatar" style="width:56px;height:56px;">${c.photo?`<img src="${c.photo}">`:Util.initials(c.name)}</div>
+      <div><div class="row-title" style="font-size:16px;">${Util.esc(c.name)}</div><div class="row-sub">${Util.esc(c.phone||'')}</div></div>
+    </div>
+    <div class="tag-row" style="margin-top:12px;">
+      ${c.phone?`<a class="btn btn-ghost btn-sm" href="tel:${c.phone}">📞 Call</a>`:''}
+      ${c.whatsapp?`<a class="btn btn-ghost btn-sm" href="https://wa.me/${c.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Print Statement</button>
+      <button class="btn btn-ghost btn-sm" onclick="Entities.customers.openForm('${c.id}')">Edit</button>
+    </div></div>
+    <div class="stat-grid">
+      <div class="stat-card">${evs.length}<div class="l">Total Events</div></div>
+      <div class="stat-card ok"><div class="v">${Util.money(totalRevenue)}</div><div class="l">Total Paid</div></div>
+      <div class="stat-card ${pending>0?'warn':'ok'}"><div class="v">${Util.money(pending)}</div><div class="l">Pending Amount</div></div>
+    </div>
+    <div class="section-label">Payment History</div>
+    ${evs.flatMap(e=>C('payments').filter(p=>p.eventId===e.id)).length? Util.sortByDateDesc(evs.flatMap(e=>C('payments').filter(p=>p.eventId===e.id)),'date').map(p=>`<div class="list-row">
+      <div class="avatar">💵</div><div class="row-main"><div class="row-title">${Util.money(p.amount)}</div><div class="row-sub">${Util.esc(p.mode||'')} · ${Util.dateShort(Util.toTS(p.date))}</div></div></div>`).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No payments yet</div></div>`}
+    <div class="section-label">Events</div>
+    ${evs.length? evs.map(e=>EventsUI.row(e)).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No events yet</div></div>`}`;
+};
+
+/* ---------------- Supplier Profile ---------------- */
+Views.supplierProfile = function(params){
+  const s = findById('suppliers',params.id);
+  if(!s) return `<div class="empty"><div class="empty-title">Supplier not found</div></div>`;
+  const paid = C('supplierPayments').filter(p=>p.supplierId===s.id);
+  const owed = supplierOutstanding(s.id);
+  const suppliedRes = C('resources').filter(r=>r.supplierId===s.id);
+  return `<div class="view-title">${Util.esc(s.name)}</div><div class="view-sub">Supplier Profile</div>
+    <div class="card"><div style="display:flex;gap:12px;align-items:center;">
+      <div class="avatar" style="width:56px;height:56px;">${s.photo?`<img src="${s.photo}">`:Util.initials(s.name)}</div>
+      <div><div class="row-title" style="font-size:16px;">${Util.esc(s.name)}</div><div class="row-sub">${Util.esc(s.phone||'')}</div></div>
+    </div>
+    <div class="tag-row" style="margin-top:12px;">
+      <button class="btn btn-primary btn-sm" onclick="SupplierUI.openPayForm('${s.id}')">+ Pay Supplier</button>
+      <button class="btn btn-ghost btn-sm" onclick="Entities.suppliers.openForm('${s.id}')">Edit</button>
+    </div></div>
+    <div class="stat-grid">
+      <div class="stat-card ok"><div class="v">${Util.money(paid.reduce((a,p)=>a+p.amount,0))}</div><div class="l">Total Paid</div></div>
+      <div class="stat-card ${owed>0?'warn':'ok'}"><div class="v">${Util.money(owed)}</div><div class="l">Pending Amount</div></div>
+    </div>
+    <div class="section-label">Payments</div>
+    ${paid.length? Util.sortByDateDesc(paid,'date').map(p=>`<div class="list-row"><div class="avatar">💸</div><div class="row-main"><div class="row-title">${Util.money(p.amount)}</div><div class="row-sub">${Util.dateShort(Util.toTS(p.date))}</div></div></div>`).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No payments yet</div></div>`}
+    <div class="section-label">Resources Supplied</div>
+    ${suppliedRes.length? suppliedRes.map(r=>Entities.resources.cfg.row(r)).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No resources linked</div></div>`}`;
+};
+const SupplierUI = {
+  openPayForm(supplierId, paymentId){
+    const sp = paymentId ? findById('supplierPayments', paymentId) : null;
+    openSheet(sp ? 'Edit Supplier Payment' : 'Pay Supplier', `
+      <div class="field"><label>Amount *</label><input type="number" id="spAmount" value="${sp?Util.esc(sp.amount):''}"></div>
+      <div class="field"><label>Date</label><input type="date" id="spDate" value="${sp?Util.esc(sp.date):Util.todayISO()}"></div>
+      <div class="field"><label>Wallet</label><select id="spWallet">${walletOptions().map(w=>`<option value="${w.value}" ${sp&&sp.wallet===w.value?'selected':''}>${w.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Note</label><input id="spNote" value="${sp?Util.esc(sp.note||''):''}"></div>
+      <button class="btn btn-primary btn-block" onclick="SupplierUI.${sp?'savePayEdit':'savePay'}('${supplierId}'${sp?`, '${paymentId}'`:''})">${sp?'Update':'Save'}</button>`);
+  },
+  async savePay(supplierId){
+    const amount=Number(document.getElementById('spAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('spWallet').value, date=document.getElementById('spDate').value;
+    const rec=await addRecord('supplierPayments',{supplierId,amount,date,wallet:walletId,note:document.getElementById('spNote').value});
+    await addLedger({walletId,dir:'out',amount,date,category:'Supplier Payment',refType:'supplierPayment',refId:rec.id,note:''});
+    closeSheet(); toast('Payment recorded'); Nav.go('supplierProfile',{id:supplierId});
+  },
+  async savePayEdit(supplierId, paymentId){
+    const sp = findById('supplierPayments', paymentId);
+    if(!sp){ toast('Payment not found'); return; }
+    const amount=Number(document.getElementById('spAmount').value)||0; if(amount<=0){ toast('Enter a valid amount'); return; }
+    const walletId=document.getElementById('spWallet').value, date=document.getElementById('spDate').value;
+    const updated = {...sp, amount, date, wallet:walletId, note:document.getElementById('spNote').value};
+    await updateRecord('supplierPayments', updated);
+    await removeLedgerByRef('supplierPayment', paymentId);
+    await addLedger({walletId,dir:'out',amount,date,category:'Supplier Payment',refType:'supplierPayment',refId:paymentId,note:''});
+    closeSheet(); toast('Payment updated'); Nav.go('supplierProfile',{id:supplierId});
+  },
+  async removePayment(paymentId, supplierId){
+    confirmDialog('Delete supplier payment?','This will remove the payment and its wallet entry.', async ()=>{
+      await removeLedgerByRef('supplierPayment', paymentId); await deleteRecord('supplierPayments', paymentId);
+      toast('Supplier payment deleted'); Nav.go('supplierProfile',{id:supplierId});
+    });
+  }
+};
+
+/* ---------------- Worker Profile ---------------- */
+Views.workerProfile = function(params){
+  const w = findById('workers',params.id);
+  if(!w) return `<div class="empty"><div class="empty-title">Worker not found</div></div>`;
+  const att = Util.sortByDateDesc(C('attendance').filter(a=>a.workerId===w.id),'date');
+  const pays = Util.sortByDateDesc(C('workerPayments').filter(p=>p.workerId===w.id),'date');
+  const pending = workerPendingWage(w.id);
+  return `<div class="view-title">${Util.esc(w.name)}</div><div class="view-sub">Worker Profile</div>
+    <div class="card"><div style="display:flex;gap:12px;align-items:center;">
+      <div class="avatar" style="width:56px;height:56px;">${w.photo?`<img src="${w.photo}">`:Util.initials(w.name)}</div>
+      <div><div class="row-title" style="font-size:16px;">${Util.esc(w.name)}</div><div class="row-sub">${Util.esc(w.skill||'General')} · ${Util.money(w.dailyWage)}/day</div></div>
+    </div>
+    <div class="tag-row" style="margin-top:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="Entities.workers.openForm('${w.id}')">Edit</button>
+    </div></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="v">${att.length}</div><div class="l">Attendance Entries</div></div>
+      <div class="stat-card ${pending>0?'warn':'ok'}"><div class="v">${Util.money(pending)}</div><div class="l">Pending Wages</div></div>
+    </div>
+    <div class="section-label">Payment History</div>
+    ${pays.length? pays.map(p=>`<div class="list-row"><div class="avatar">💸</div><div class="row-main"><div class="row-title">${Util.money(p.amount)}</div><div class="row-sub">${Util.esc((findById('events',p.eventId)||{}).title||'')} · ${Util.dateShort(Util.toTS(p.date))}</div></div></div>`).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No payments yet</div></div>`}
+    <div class="section-label">Attendance</div>
+    ${att.length? att.map(a=>`<div class="list-row"><div class="avatar">👷</div><div class="row-main"><div class="row-title">${Util.esc((findById('events',a.eventId)||{}).title||'')}</div><div class="row-sub">${Util.dateShort(Util.toTS(a.date))}</div></div><div class="row-end"><span class="chip neutral">${a.status}</span></div></div>`).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No attendance recorded</div></div>`}`;
+};
+
+/* ============================================================
+   REPORTS
+   ============================================================ */
+const ReportsUI = {
+  range:'month', from:'', to:'',
+  bounds(){
+    const now=new Date();
+    if(this.range==='day') return [new Date(now.toDateString()).getTime(), now.getTime()];
+    if(this.range==='week'){ const d=new Date(now); d.setDate(d.getDate()-7); return [d.getTime(), now.getTime()]; }
+    if(this.range==='month'){ const d=new Date(now.getFullYear(),now.getMonth(),1); return [d.getTime(), now.getTime()]; }
+    if(this.range==='year'){ const d=new Date(now.getFullYear(),0,1); return [d.getTime(), now.getTime()]; }
+    if(this.range==='custom' && this.from && this.to) return [Util.toTS(this.from), Util.toTS(this.to)+86399999];
+    return [0, now.getTime()];
+  },
+  inRange(ts){ const [a,b]=this.bounds(); return ts>=a && ts<=b; }
+};
+Views.reports = function(){
+  const [from,to] = ReportsUI.bounds();
+  const pays = C('payments').filter(p=>ReportsUI.inRange(Util.toTS(p.date)));
+  const exps = C('expenses').filter(e=>ReportsUI.inRange(Util.toTS(e.date)));
+  const wPays = C('workerPayments').filter(p=>ReportsUI.inRange(Util.toTS(p.date)));
+  const revenue = pays.reduce((s,p)=>s+p.amount,0);
+  const expenseTotal = exps.reduce((s,e)=>s+e.amount,0) + wPays.reduce((s,p)=>s+p.amount,0);
+  const grossProfit = revenue - expenseTotal;
+  const inv = C('partnerTx').filter(t=>t.type==='investment' && ReportsUI.inRange(Util.toTS(t.date))).reduce((s,t)=>s+t.amount,0);
+  const wd = C('partnerTx').filter(t=>t.type==='withdrawal' && ReportsUI.inRange(Util.toTS(t.date))).reduce((s,t)=>s+t.amount,0);
+  const netProfit = C('events').filter(e=>e.eventDate && ReportsUI.inRange(Util.toTS(e.eventDate))).reduce((s,e)=>s+eventProfit(e),0);
+  const pending = C('events').reduce((s,e)=>s+Math.max(0,(Number(e.contractAmount)||0)-eventReceived(e.id)),0);
+  const byCategory = {};
+  exps.forEach(e=>{ byCategory[e.category]=(byCategory[e.category]||0)+e.amount; });
+  const eventProfitRows = Util.sortByDateDesc(C('events'),'eventDate').slice(0,15);
+
+  return `
+    <div class="view-title no-print">Reports</div>
+    <div class="view-sub no-print">Revenue, profit, cash flow &amp; more</div>
+    <div class="tabs no-print">${['day','week','month','year','custom'].map(r=>`<div class="tab ${ReportsUI.range===r?'active':''}" onclick="ReportsUI.range='${r}'; Nav.go('reports');">${r[0].toUpperCase()+r.slice(1)}</div>`).join('')}</div>
+    ${ReportsUI.range==='custom'?`<div class="field-row no-print"><div class="field"><label>From</label><input type="date" value="${ReportsUI.from}" onchange="ReportsUI.from=this.value; Nav.go('reports');"></div><div class="field"><label>To</label><input type="date" value="${ReportsUI.to}" onchange="ReportsUI.to=this.value; Nav.go('reports');"></div></div>`:''}
+
+    <div class="stat-grid">
+      <div class="stat-card ok"><div class="v">${Util.money(revenue)}</div><div class="l">Revenue</div></div>
+      <div class="stat-card warn"><div class="v">${Util.money(expenseTotal)}</div><div class="l">Expense</div></div>
+      <div class="stat-card ${grossProfit>=0?'ok':'danger'}"><div class="v">${Util.money(grossProfit)}</div><div class="l">Gross Profit</div></div>
+      <div class="stat-card"><div class="v">${Util.money(netProfit)}</div><div class="l">Net Profit</div></div>
+      <div class="stat-card"><div class="v">${Util.money(inv)}</div><div class="l">Partner Investment</div></div>
+      <div class="stat-card"><div class="v">${Util.money(wd)}</div><div class="l">Partner Withdrawals</div></div>
+      <div class="stat-card"><div class="v">${Util.money(totalCash())}</div><div class="l">Current Cash</div></div>
+      <div class="stat-card ${pending>0?'warn':'ok'}"><div class="v">${Util.money(pending)}</div><div class="l">Pending Collections</div></div>
+    </div>
+
+    <div class="section-label">Expense by Category</div>
+    <div class="card">${Object.keys(byCategory).length? Object.entries(byCategory).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13.5px;"><span>${Util.esc(cat)}</span><span class="num">${Util.money(amt)}</span></div>`).join('') : `<div class="muted" style="font-size:13px;">No expenses in this range</div>`}</div>
+
+    <div class="section-label">Expense Report</div>
+    <div class="card">${exps.length? exps.slice(0,12).map(e=>{
+      const supplier = findById('suppliers', e.supplierId) || {};
+      return `<div class="list-row" style="align-items:flex-start;">
+        <div class="avatar">🧾</div>
+        <div class="row-main"><div class="row-title">${Util.esc(e.category)}</div><div class="row-sub">${Util.esc(e.notes || supplier.name || 'General Business')} · ${Util.dateShort(Util.toTS(e.date))}</div></div>
+        <div class="row-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <div class="row-amt">${Util.money(e.amount)}</div>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); ExpensesUI.openForm('${e.id}')">Edit</button>
+        </div>
+      </div>`;
+    }).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No expenses in this range</div></div>`}</div>
+    <div class="form-actions no-print"><button class="btn btn-primary btn-block" onclick="Nav.go('expenses')">View all expenses</button></div>
+
+    <div class="section-label">Event-wise Profit</div>
+    ${eventProfitRows.length? eventProfitRows.map(e=>{ const pr=eventProfit(e);
+      return `<div class="list-row" onclick="Nav.go('eventDetail',{id:'${e.id}'})"><div class="avatar">🎉</div>
+      <div class="row-main"><div class="row-title">${Util.esc(e.title||'Untitled')}</div><div class="row-sub">${Util.dateShort(Util.toTS(e.eventDate))}</div></div>
+      <div class="row-end"><div class="row-amt ${pr>=0?'text-ok':'text-danger'}">${Util.money(pr)}</div></div></div>`; }).join('') : `<div class="empty" style="padding:20px;"><div class="empty-sub">No events yet</div></div>`}
+
+    <div class="section-label no-print">Export</div>
+    <div class="card no-print" style="display:flex;gap:10px;">
+      <button class="btn btn-ghost btn-block" onclick="window.print()">🖨️ Print / Save PDF</button>
+    </div>
+  `;
+};
+
+/* ============================================================
+   BACKUP & RESTORE
+   ============================================================ */
+const BackupUI = {
+  async exportJSON(){
+    const payload = { app:'BlossomEventsERP', version:DB_VERSION, exportedAt:Date.now(), settings:App.settings, data:{} };
+    for(const s of STORES){ if(s!=='settings') payload.data[s]=C(s); }
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`blossom-backup-${Util.todayISO()}.json`; a.click();
+    URL.revokeObjectURL(url);
+    toast('Backup downloaded');
+  },
+  triggerRestore(){ document.getElementById('restoreFileInput').click(); },
+  handleRestoreFile(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const payload = JSON.parse(reader.result);
+        if(!payload.data){ toast('Invalid backup file'); return; }
+        confirmDialog('Restore backup?','This will overwrite ALL current data on this device with the backup contents. This cannot be undone.', async ()=>{
+          for(const s of STORES){
+            if(s==='settings') continue;
+            await dbClear(s);
+            App.cache[s]=[];
+            for(const item of (payload.data[s]||[])){ await dbPut(s,item); App.cache[s].push(item); }
+          }
+          if(payload.settings){ App.settings=payload.settings; await dbPut('settings',App.settings); }
+          toast('Backup restored'); applyBranding(); applyTheme(App.settings.theme||'light'); Nav.go('dashboard');
+        }, 'Restore & Overwrite');
+      }catch(err){ toast('Could not read backup file'); }
+    };
+    reader.readAsText(file);
+  }
+};
+Views.backup = function(){
+  const totalRecords = STORES.filter(s=>s!=='settings').reduce((s,st)=>s+C(st).length,0);
+  return `<div class="view-title">Backup &amp; Restore</div><div class="view-sub">${totalRecords} records on this device</div>
+    <div class="card">
+      <div class="row-title" style="margin-bottom:6px;">Export Backup</div>
+      <div class="muted" style="font-size:13px;margin-bottom:12px;">Save a full JSON backup of settings, partners, customers, events, finance, resources, workers, suppliers and expenses.</div>
+      <button class="btn btn-primary btn-block" onclick="BackupUI.exportJSON()">⬇️ Download Backup (.json)</button>
+    </div>
+    <div class="card">
+      <div class="row-title" style="margin-bottom:6px;">Restore Backup</div>
+      <div class="muted" style="font-size:13px;margin-bottom:12px;">Restoring will overwrite all data currently on this device. Make sure you have a current backup first.</div>
+      <input type="file" accept="application/json" id="restoreFileInput" style="display:none;" onchange="BackupUI.handleRestoreFile(event)">
+      <button class="btn btn-ghost btn-block" onclick="BackupUI.triggerRestore()">⬆️ Choose Backup File</button>
+    </div>`;
+};
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+Views.settings = function(){
+  const s = App.settings;
+  return `<div class="view-title">Settings</div><div class="view-sub">Business profile and app preferences</div>
+    <div class="card">
+      <div class="field"><label>Business Name</label><input id="stBizName" value="${Util.esc(s.bizName)}"></div>
+      <div class="field"><label>Address</label><textarea id="stAddress">${Util.esc(s.address)}</textarea></div>
+      <div class="field"><label>Phone</label><input id="stPhone" type="tel" value="${Util.esc(s.phone)}"></div>
+      <div class="field"><label>Email</label><input id="stEmail" type="email" value="${Util.esc(s.email||'')}"></div>
+      <div class="field"><label>Currency Symbol</label><select id="stCurrency">${['₹','$','€','£','AED'].map(c=>`<option ${s.currency===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Logo</label><input type="file" accept="image/*" id="stLogoFile" onchange="SettingsUI.handleLogo(event)">
+        <div id="stLogoPreview" style="margin-top:8px;">${s.logo?`<img src="${s.logo}" style="width:56px;height:56px;object-fit:cover;border-radius:14px;">`:''}</div></div>
+      <button class="btn btn-primary btn-block" onclick="SettingsUI.saveBusiness()">Save Business Details</button>
+    </div>
+    <div class="card">
+      <div class="row-title" style="margin-bottom:10px;">Appearance</div>
+      <div class="tag-row">
+        <div class="tag-opt ${s.theme==='light'?'sel':''}" onclick="SettingsUI.setTheme('light')">☀️ Light</div>
+        <div class="tag-opt ${s.theme==='dark'?'sel':''}" onclick="SettingsUI.setTheme('dark')">🌙 Dark</div>
+        <div class="tag-opt ${s.theme==='system'?'sel':''}" onclick="SettingsUI.setTheme('system')">🖥️ System</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row-title" style="margin-bottom:6px;">Security</div>
+      <div class="muted" style="font-size:13px;margin-bottom:10px;">${s.pin? 'A PIN is currently set on this device.' : 'No PIN is set.'}</div>
+      <div class="field"><label>${s.pin?'Change':'Set'} PIN (4 digits, leave blank to remove)</label><input id="stPin" type="password" inputmode="numeric" maxlength="4"></div>
+      <button class="btn btn-ghost btn-block" onclick="SettingsUI.savePin()">Update PIN</button>
+    </div>
+    <div class="card">
+      <div class="row-title" style="margin-bottom:6px;">About</div>
+      <div class="muted" style="font-size:13px;">Blossom Events ERP · Version 1.0<br>An offline-first business manager for event companies. All data is stored locally on this device via IndexedDB.</div>
+    </div>
+    <div class="card">
+      <button class="btn btn-danger btn-block" onclick="SettingsUI.resetApp()">⚠️ Reset App (Erase All Data)</button>
+    </div>`;
+};
+const SettingsUI = {
+  _logoTemp:null,
+  handleLogo(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ this._logoTemp=reader.result; document.getElementById('stLogoPreview').innerHTML=`<img src="${reader.result}" style="width:56px;height:56px;object-fit:cover;border-radius:14px;">`; };
+    reader.readAsDataURL(file);
+  },
+  async saveBusiness(){
+    App.settings.bizName = document.getElementById('stBizName').value.trim() || App.settings.bizName;
+    App.settings.address = document.getElementById('stAddress').value;
+    App.settings.phone = document.getElementById('stPhone').value;
+    App.settings.email = document.getElementById('stEmail').value;
+    App.settings.currency = document.getElementById('stCurrency').value;
+    if(this._logoTemp) App.settings.logo = this._logoTemp;
+    await updateRecordSettings();
+    applyBranding();
+    toast('Business details saved');
+  },
+  async setTheme(t){ App.settings.theme=t; await updateRecordSettings(); applyTheme(t); toast('Theme updated'); },
+  async savePin(){
+    const v = document.getElementById('stPin').value.trim();
+    if(v && !/^\d{4}$/.test(v)){ toast('PIN must be 4 digits'); return; }
+    App.settings.pin = v;
+    await updateRecordSettings();
+    toast(v? 'PIN updated' : 'PIN removed');
+    Nav.go('settings');
+  },
+  resetApp(){
+    confirmDialog('Reset entire app?','This permanently erases ALL business data on this device — events, finance, partners, everything. This cannot be undone. Consider exporting a backup first.', async ()=>{
+      for(const s of STORES) await dbClear(s);
+      location.reload();
+    }, 'Erase Everything');
+  }
+};
+
+/* ============================================================
+   PWA SETUP
+   ============================================================ */
+function setupPWA(){
+  try{
+    const manifest = {
+      name: (App.settings.bizName||'Blossom Events')+' ERP',
+      short_name: (App.settings.bizName||'Blossom').slice(0,12),
+      start_url: '.', display: 'standalone', background_color:'#FBF7F4', theme_color:'#4A1942',
+      icons: [{ src: App.settings.logo || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" rx="20" fill="%234A1942"/%3E%3Ctext x="50" y="66" font-size="50" text-anchor="middle" fill="white" font-family="serif"%3EB%3C/text%3E%3C/svg%3E', sizes:'192x192', type:'image/png' }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    document.getElementById('manifestLink').setAttribute('href', URL.createObjectURL(blob));
+  }catch(e){ /* manifest is a progressive enhancement only */ }
+
+  window.addEventListener('beforeinstallprompt', (e)=>{
+    e.preventDefault();
+    window.__deferredInstallPrompt = e;
+  });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+boot();
+</script>
+</body>
+</html>
