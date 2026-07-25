@@ -353,7 +353,8 @@ function startApp(){
   document.getElementById('app').style.display='flex';
   applyTheme(App.settings.theme||'light');
   applyBranding();
-  Nav.go('dashboard');
+  Nav.go('dashboard', null, true);
+  history.replaceState({app:'blossom',view:'dashboard',params:{}}, '', '');
   setupPWA();
 }
 function applyBranding(){
@@ -377,7 +378,10 @@ async function updateRecordSettings(){ await dbPut('settings',App.settings); }
 
 /* ---------------- NAV / ROUTER ---------------- */
 const Nav = {
-  go(view, params){
+  go(view, params, replaceHistory){
+    if(!replaceHistory){
+      history.pushState({app:'blossom', view, params: params||{}}, '', '');
+    }
     App.view = view; App.viewParams = params||{};
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view || (view==='more-'&&b.dataset.view==='more')));
     const main=document.getElementById('mainView');
@@ -387,6 +391,12 @@ const Nav = {
     updateFab();
   }
 };
+window.addEventListener('popstate', (event)=>{
+  const state = event.state;
+  if(state && state.app==='blossom'){
+    Nav.go(state.view, state.params, true);
+  }
+});
 document.querySelectorAll('.nav-item').forEach(btn=>{
   btn.onclick=()=>Nav.go(btn.dataset.view);
 });
