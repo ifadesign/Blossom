@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>Blossom Events ERP</title>
 <link rel="manifest" id="manifestLink">
-<meta name="theme-color" content="#4A1942">
+<meta name="theme-color" content="#11204B">
 <style>
 :root{
-  --plum:#4A1942; --plum-2:#6B2B5C; --gold:#C9A15A; --gold-2:#E4C589;
-  --blush:#F2C7C2; --bg:#FBF7F4; --surface:#FFFFFF; --surface-2:#F6EFE9;
-  --ink:#2B2320; --ink-soft:#6b5f5a; --line:rgba(43,35,32,0.10);
-  --ok:#3E8E5A; --warn:#C77B2B; --danger:#B4443B;
+  --plum:#11204B; --plum-2:#2D4B8F; --gold:#F3B438; --gold-2:#F8D87B;
+  --blush:#F6705E; --bg:#F5F7FB; --surface:#FFFFFF; --surface-2:#EDF1F8;
+  --ink:#131A34; --ink-soft:#5B6B8F; --line:rgba(19,26,52,0.08);
+  --ok:#2A8C80; --warn:#E77B3D; --danger:#C13D57;
   --radius:18px; --radius-sm:12px;
-  --shadow:0 8px 30px rgba(74,25,66,0.10);
+  --shadow:0 8px 30px rgba(17,32,75,0.12);
   --font-display:'Fraunces',serif; --font-body:'Manrope',sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
 [data-theme="dark"]{
-  --plum:#364d12; --plum-2:#a95f92; --gold:#e4c589; --gold-2:#f0d9a8;
-  --blush:#5c3a45; --bg:#1A1220; --surface:#241A2C; --surface-2:#2E2136;
-  --ink:#F3ECEE; --ink-soft:#c9bcc3; --line:rgba(243,236,238,0.10);
-  --shadow:0 8px 30px rgba(0,0,0,0.35);
+  --plum:#0F1B3E; --plum-2:#3D4E9E; --gold:#F3B438; --gold-2:#F8D87B;
+  --blush:#F98A6D; --bg:#0C1123; --surface:#161F3E; --surface-2:#232D57;
+  --ink:#F5F7FF; --ink-soft:#B0BEDC; --line:rgba(245,247,255,0.08);
+  --shadow:0 8px 30px rgba(0,0,0,0.45);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
@@ -55,7 +55,7 @@ main{flex:1;padding:0 16px 100px;}
 [data-theme="dark"] .glass{background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.08);}
 
 /* Hero arch (signature element) */
-.hero-arch{position:relative;border-radius:28px 28px 120px 120px/28px 28px 60px 60px;background:linear-gradient(160deg,var(--plum) 0%,var(--plum-2) 55%,var(--gold) 130%);color:#fff;padding:22px 20px 26px;overflow:hidden;box-shadow:var(--shadow);}
+.hero-arch{position:relative;border-radius:32px;background:linear-gradient(160deg,var(--plum) 0%,var(--plum-2) 55%,var(--gold) 130%);color:#fff;padding:22px 20px 26px;overflow:hidden;box-shadow:var(--shadow);}
 .hero-arch::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.18),transparent 70%);}
 .hero-eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.85;}
 .hero-figure{font-family:var(--font-display);font-size:34px;font-weight:600;margin:4px 0 2px;}
@@ -340,20 +340,14 @@ function totalCash(){ return C('wallets').reduce((s,w)=>s+walletBalance(w.id),0)
 async function boot(){
   await dbOpen();
   const settingsArr = await dbGetAll('settings');
-  App.settings = settingsArr.find(s=>s.id==='main') || null;
+  App.settings = settingsArr.find(s=>s.id==='main') || { id:'main', theme:'light', setupDone:true, bizName:'Blossom Events' };
+  if(!App.settings.setupDone) App.settings.setupDone = true;
+  if(!App.settings.theme) App.settings.theme = 'light';
+  if(!App.settings.bizName) App.settings.bizName = 'Blossom Events';
   for(const s of STORES){ if(s==='settings') continue; App.cache[s] = await dbGetAll(s); }
 
   document.getElementById('loadingScreen').style.display='none';
-
-  if(!App.settings || !App.settings.setupDone){
-    Wizard.start();
-    return;
-  }
-  if(App.settings.pin){
-    PinLock.show(()=>startApp());
-  } else {
-    startApp();
-  }
+  startApp();
 }
 function startApp(){
   document.getElementById('app').style.display='flex';
@@ -1020,11 +1014,12 @@ function drawDashChart(){
    ============================================================ */
 const EVENT_TIMELINE = ['Booked','Advance Received','Planning','Resource Ready','Decoration Started','Event Running','Completed','Payment Pending','Closed'];
 const EventsUI = {
-  filter:'All', query:'',
+  filter:'All', query:'', actionsCollapsed:true,
   statusChip(status){
     const map={Booked:'neutral','Advance Received':'plum',Planning:'neutral','Resource Ready':'neutral','Decoration Started':'warn','Event Running':'warn',Completed:'ok','Payment Pending':'danger',Closed:'ok'};
     return `<span class="chip ${map[status]||'neutral'}">${Util.esc(status||'Booked')}</span>`;
   },
+  toggleActions(){ this.actionsCollapsed = !this.actionsCollapsed; Views.refreshCurrent(); },
   row(e){
     const received = eventReceived(e.id); const pending = Math.max(0,(Number(e.contractAmount)||0)-received);
     return `<div class="list-row" onclick="Nav.go('eventDetail',{id:'${e.id}'})">
@@ -1035,8 +1030,13 @@ const EventsUI = {
     </div>`;
   },
   list(){
-    let items = C('events').filter(e=>!e.archived);
-    if(this.filter!=='All') items = items.filter(e=>e.status===this.filter);
+    let items = C('events');
+    if(this.filter==='Archived') {
+      items = items.filter(e=>e.archived);
+    } else {
+      items = items.filter(e=>!e.archived);
+      if(this.filter!=='All') items = items.filter(e=>e.status===this.filter);
+    }
     if(this.query){ const q=this.query.toLowerCase(); items = items.filter(e=>(e.title||'').toLowerCase().includes(q)||(e.customerName||'').toLowerCase().includes(q)); }
     return Util.sortByDateDesc(items,'eventDate');
   },
@@ -1285,19 +1285,30 @@ const EventsUI = {
 };
 
 Views.events = function(){
-  const filters=['All',...EVENT_TIMELINE];
+  const filters=['All',...EVENT_TIMELINE,'Archived'];
+  const total = EventsUI.filter==='Archived'
+    ? C('events').filter(e=>e.archived).length
+    : C('events').filter(e=>!e.archived).length;
+  const subText = EventsUI.filter==='Archived' ? `${total} archived events` : `${total} total events`;
+  const emptyState = EventsUI.filter==='Archived'
+    ? `<div class="empty"><div class="empty-icon">🗄️</div><div class="empty-title">No archived events</div><div class="empty-sub">Restore events from the archived tab if needed.</div></div>`
+    : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter, or add your first event.</div><button class="btn btn-primary" onclick="EventsUI.openForm()">+ New Event</button></div>`;
   return `
     <div class="view-title">Events</div>
-    <div class="view-sub">${C('events').filter(e=>!e.archived).length} total events</div>
+    <div class="view-sub">${subText}</div>
     <div class="search-bar">
       <input placeholder="Search events or customers…" value="${Util.esc(EventsUI.query)}" oninput="EventsUI.query=this.value; Views.refreshEvents();">
     </div>
     <div class="tabs">${filters.map(f=>`<div class="tab ${EventsUI.filter===f?'active':''}" onclick="EventsUI.filter='${f}'; Views.refreshEvents();">${f}</div>`).join('')}</div>
-    <div id="eventsListWrap">${EventsUI.list().length? EventsUI.list().map(e=>EventsUI.row(e)).join('') : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter, or add your first event.</div><button class="btn btn-primary" onclick="EventsUI.openForm()">+ New Event</button></div>`}</div>
+    <div id="eventsListWrap">${EventsUI.list().length? EventsUI.list().map(e=>EventsUI.row(e)).join('') : emptyState}</div>
   `;
 };
 Views.refreshEvents = function(){
   document.getElementById('eventsListWrap').innerHTML = EventsUI.list().length? EventsUI.list().map(e=>EventsUI.row(e)).join('') : `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">No events found</div></div>`;
+};
+
+Views.refreshCurrent = function(){
+  Nav.go(App.view, App.viewParams);
 };
 
 Views.eventDetail = function(params){
@@ -1331,15 +1342,19 @@ Views.eventDetail = function(params){
       <div class="section-label">Move Timeline</div>
       <div class="tag-row">${EVENT_TIMELINE.map(s=>`<div class="tag-opt ${ev.status===s?'sel':''}" onclick="EventsUI.setStatus('${ev.id}','${s}')">${s}</div>`).join('')}</div>
       ${ev.notes?`<div class="section-label">Notes</div><div class="card">${Util.esc(ev.notes)}</div>`:''}
-      <div class="section-label">Actions</div>
-      <div class="card" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="section-label">
+        Actions
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); EventsUI.toggleActions()">${EventsUI.actionsCollapsed?'⬇️ Expand':'⬆️ Collapse'}</button>
+      </div>
+      ${EventsUI.actionsCollapsed ? `<div class="card muted" style="padding:16px;">Actions are collapsed. Tap expand to show action buttons.</div>` : `<div class="card" style="display:flex;flex-direction:column;gap:8px;">
         <button class="btn btn-ghost btn-block" onclick="EventsUI.openForm('${ev.id}')">✏️ Edit Event</button>
         <button class="btn btn-ghost btn-block" onclick="EventsUI.duplicate('${ev.id}')">📄 Duplicate</button>
         <button class="btn btn-ghost btn-block" onclick="EventsUI.printEvent('${ev.id}')">🖨️ Print / PDF</button>
         ${ev.archived? `<button class="btn btn-ghost btn-block" onclick="EventsUI.restore('${ev.id}')">↩️ Restore</button>` : `<button class="btn btn-ghost btn-block" onclick="EventsUI.archive('${ev.id}')">🗄️ Archive</button>`}
         ${ev.status!=='Closed'?`<button class="btn btn-gold btn-block" onclick="EventsUI.closeEvent('${ev.id}')">✅ Close Event</button>`:''}
         <button class="btn btn-danger btn-block" onclick="EventsUI.remove('${ev.id}')">🗑️ Delete Event</button>
-      </div>`;
+      </div>`}
+`;
   } else if(tab==='payments'){
     const pays = Util.sortByDateDesc(C('payments').filter(p=>p.eventId===ev.id),'date');
     body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openPaymentForm('${ev.id}')">+ Record Payment</button><div style="height:12px"></div>`
