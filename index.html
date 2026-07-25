@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>Blossom Events ERP</title>
 <link rel="manifest" id="manifestLink">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#11204B">
 <style>
 :root{
@@ -14,7 +17,7 @@
   --ok:#2A8C80; --warn:#E77B3D; --danger:#C13D57;
   --radius:18px; --radius-sm:12px;
   --shadow:0 8px 30px rgba(17,32,75,0.12);
-  --font-display:'Fraunces',serif; --font-body:'Manrope',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --font-display:'Inter',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
 [data-theme="dark"]{
   --plum:#0F1B3E; --plum-2:#3D4E9E; --gold:#F3B438; --gold-2:#F8D87B;
@@ -40,8 +43,10 @@ button{font-family:inherit;}
 .brand-name{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.2px;}
 .brand-sub{font-size:11px;color:var(--ink-soft);margin-top:-2px;}
 .topbar-actions{display:flex;gap:8px;}
-.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
-.icon-btn:active{transform:scale(0.94);}
+.icon-btn{width:40px;height:40px;border-radius:14px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;}
+.icon-btn:hover{background:rgba(131,70,180,0.08);border-color:rgba(131,70,180,0.18);}
+[data-theme="dark"] .icon-btn:hover{background:rgba(250,204,88,0.12);border-color:rgba(250,204,88,0.18);}
+.icon-btn:active{transform:scale(0.95);}
 
 /* View header */
 .view-title{font-family:var(--font-display);font-size:22px;font-weight:600;margin:6px 16px 2px;}
@@ -116,24 +121,37 @@ main{flex:1;padding:0 16px 100px;}
 .btn-sm{padding:7px 12px;font-size:12.5px;border-radius:9px;}
 
 /* FAB */
-.fab{position:fixed;right:calc(50% - 260px + 20px);bottom:96px;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--plum),var(--gold));color:#fff;border:none;font-size:26px;box-shadow:0 10px 24px rgba(74,25,66,0.35);z-index:30;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.fab{position:fixed;right:calc(50% - 260px + 20px);bottom:96px;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--plum),var(--gold));color:#fff;border:none;font-size:26px;box-shadow:0 10px 24px rgba(74,25,66,0.35);z-index:30;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease;}
+.fab.green{background:linear-gradient(135deg,#1bb77a,#0f8b5f);box-shadow:0 10px 24px rgba(26,120,87,0.35);}
+.fab.red{background:linear-gradient(135deg,#ff6b6b,#d82020);box-shadow:0 10px 24px rgba(184,45,45,0.35);}
+.fab.blue{background:linear-gradient(135deg,#4d8cff,#2765d1);box-shadow:0 10px 24px rgba(42,78,151,0.35);}
 @media (max-width:560px){.fab{right:20px;}}
 .fab:active{transform:scale(0.92);}
 
 /* Bottom nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;z-index:25;max-width:520px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;color:var(--ink-soft);cursor:pointer;border:none;background:none;font-family:inherit;}
-.nav-item.active{color:var(--plum);}
-[data-theme="dark"] .nav-item.active{color:var(--gold-2);}
-.nav-item svg{width:21px;height:21px;}
-.nav-item span{font-size:10.5px;font-weight:600;}
+.bottom-nav{position:fixed;bottom:12px;left:12px;right:12px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.07);border-radius:24px;display:flex;gap:8px;z-index:25;max-width:520px;margin:0 auto;padding:10px;box-shadow:0 18px 50px rgba(14,19,30,0.12);backdrop-filter:blur(18px);}
+[data-theme="dark"] .bottom-nav{background:rgba(12,10,15,0.92);border-color:rgba(255,255,255,0.08);box-shadow:0 18px 50px rgba(0,0,0,0.35);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 10px;border-radius:18px;color:var(--ink-soft);cursor:pointer;border:1px solid transparent;background:transparent;font-family:inherit;transition:transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;}
+.nav-item:hover{transform:translateY(-1px);}
+.nav-item.active{color:var(--plum);background:rgba(131,70,180,0.1);border-color:rgba(131,70,180,0.16);box-shadow:0 10px 24px rgba(131,70,180,0.12);}
+[data-theme="dark"] .nav-item.active{color:var(--gold-2);background:rgba(250,204,88,0.12);border-color:rgba(250,204,88,0.18);box-shadow:0 10px 24px rgba(225,169,36,0.16);}
+.nav-item svg{width:22px;height:22px;}
+.nav-item span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
 
 /* Forms / Sheets */
 .sheet-backdrop{position:fixed;inset:0;background:rgba(20,10,20,0.45);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
 .sheet-backdrop.open{opacity:1;pointer-events:auto;}
 .sheet{width:100%;max-width:520px;max-height:92vh;background:var(--bg);border-radius:24px 24px 0 0;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom);}
-.sheet-backdrop.open .sheet{transform:translateY(0);}
+.sheet-backdrop.open .sheet{transform:translateY(0);animation:slide-up .20s ease-out;}
+.sheet-backdrop.closing{opacity:0;pointer-events:none;}
+.sheet-backdrop.closing .sheet{animation:slide-down .18s ease-in forwards;}
 .sheet-handle{width:40px;height:4px;background:var(--line);border-radius:4px;margin:10px auto 4px;}
+@keyframes slide-up{from{transform:translateY(110%);}to{transform:translateY(0);} }
+@keyframes slide-down{from{transform:translateY(0);}to{transform:translateY(110%);} }
+@keyframes slide-in-right{from{transform:translateX(24px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes slide-in-left{from{transform:translateX(-24px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+#mainView.slide-in-right{animation:slide-in-right .24s ease-out;}
+#mainView.slide-in-left{animation:slide-in-left .24s ease-out;}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 4px;}
 .sheet-head h3{margin:0;font-size:18px;}
 .sheet-body{padding:6px 20px 24px;}
@@ -353,8 +371,11 @@ function startApp(){
   document.getElementById('app').style.display='flex';
   applyTheme(App.settings.theme||'light');
   applyBranding();
+  App.historyIndex = 0;
+  App.initialized = false;
+  history.replaceState({app:'blossom',view:'dashboard',params:{},idx:0}, '', '');
   Nav.go('dashboard', null, true);
-  history.replaceState({app:'blossom',view:'dashboard',params:{}}, '', '');
+  App.initialized = true;
   setupPWA();
 }
 function applyBranding(){
@@ -377,10 +398,19 @@ document.getElementById('themeToggle').onclick=()=>{
 async function updateRecordSettings(){ await dbPut('settings',App.settings); }
 
 /* ---------------- NAV / ROUTER ---------------- */
+const NavOrder = ['dashboard','events','finance','resources','more'];
+function inferDirection(target, current){
+  const tIndex = NavOrder.indexOf(target);
+  const cIndex = NavOrder.indexOf(current);
+  if(tIndex === -1 || cIndex === -1 || tIndex === cIndex) return 'forward';
+  return tIndex < cIndex ? 'back' : 'forward';
+}
 const Nav = {
-  go(view, params, replaceHistory){
+  go(view, params, replaceHistory, direction){
+    const effectiveDirection = direction || inferDirection(view, App.view);
     if(!replaceHistory){
-      history.pushState({app:'blossom', view, params: params||{}}, '', '');
+      App.historyIndex = (App.historyIndex||0) + 1;
+      history.pushState({app:'blossom', view, params: params||{}, idx: App.historyIndex}, '', '');
     }
     App.view = view; App.viewParams = params||{};
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view || (view==='more-'&&b.dataset.view==='more')));
@@ -389,12 +419,17 @@ const Nav = {
     if(Views[view]) main.innerHTML = Views[view](params);
     else main.innerHTML = Views.notfound();
     updateFab();
+    if(App.initialized){
+      animateView(effectiveDirection);
+    }
   }
 };
 window.addEventListener('popstate', (event)=>{
   const state = event.state;
   if(state && state.app==='blossom'){
-    Nav.go(state.view, state.params, true);
+    const direction = state.idx < App.historyIndex ? 'back' : 'forward';
+    App.historyIndex = state.idx;
+    Nav.go(state.view, state.params, true, direction);
   }
 });
 document.querySelectorAll('.nav-item').forEach(btn=>{
@@ -408,8 +443,20 @@ function updateFab(){
     partners:()=>Entities.partners.openForm(), customers:()=>Entities.customers.openForm(),
     suppliers:()=>Entities.suppliers.openForm(), workers:()=>Entities.workers.openForm(),
     expenses:()=>ExpensesUI.openForm(), reports:null, settings:null, wallets:()=>FinanceUI.openWalletForm() };
+  const variantMap={ dashboard:'', events:'green', finance:'red', resources:'blue', more:'' };
   const action = map[App.view];
+  fab.classList.remove('green','red','blue');
+  const variant = variantMap[App.view];
+  if(variant) fab.classList.add(variant);
   if(action){ fab.style.display='flex'; fab.onclick=action; } else { fab.style.display='none'; }
+}
+function animateView(direction){
+  const main=document.getElementById('mainView');
+  if(!main) return;
+  main.classList.remove('slide-in-right','slide-in-left');
+  void main.offsetWidth;
+  main.classList.add(direction==='back' ? 'slide-in-left' : 'slide-in-right');
+  main.addEventListener('animationend', ()=> main.classList.remove('slide-in-right','slide-in-left'), {once:true});
 }
 
 /* ---------------- SHEET / TOAST / CONFIRM ---------------- */
@@ -418,9 +465,20 @@ function openSheet(title, bodyHtml){
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>${Util.esc(title)}</h3><button class="icon-btn" onclick="closeSheet()">✕</button></div>
     <div class="sheet-body">${bodyHtml}</div>`;
-  document.getElementById('sheetBackdrop').classList.add('open');
+  const backdrop = document.getElementById('sheetBackdrop');
+  backdrop.classList.remove('closing');
+  backdrop.classList.add('open');
 }
-function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('open'); }
+function closeSheet(){
+  const backdrop = document.getElementById('sheetBackdrop');
+  const sheet = backdrop.querySelector('.sheet');
+  backdrop.classList.add('closing');
+  sheet.classList.add('slide-down');
+  sheet.addEventListener('animationend', ()=>{
+    backdrop.classList.remove('open','closing');
+    sheet.classList.remove('slide-down');
+  }, {once:true});
+}
 document.getElementById('sheetBackdrop').addEventListener('click',e=>{ if(e.target.id==='sheetBackdrop') closeSheet(); });
 
 let _toastTimer=null;
