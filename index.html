@@ -45,8 +45,8 @@ button{font-family:inherit;}
 /* Top bar */
 .topbar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 70%,transparent);backdrop-filter:blur(6px);padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
 .brand{display:flex;align-items:center;gap:10px;}
-.brand-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--plum),var(--gold));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-weight:700;font-size:16px;flex-shrink:0;overflow:hidden;}
-.brand-logo img{width:100%;height:100%;object-fit:cover;}
+.brand-logo{width:42px;height:42px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.brand-logo img{width:100%;height:100%;object-fit:contain;display:block;}
 .brand-name{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.2px;}
 .brand-sub{font-size:11px;color:var(--ink-soft);margin-top:-2px;}
 .topbar-actions{display:flex;gap:8px;}
@@ -259,7 +259,7 @@ a.link{color:var(--plum);text-decoration:none;font-weight:600;}
 <div id="app" style="display:none;">
   <div class="topbar">
     <div class="brand">
-      <div class="brand-logo" id="brandLogo">B</div>
+      <div class="brand-logo" id="brandLogo"><img src="logo.png" alt="Brand logo"></div>
       <div>
         <div class="brand-name" id="brandName">Blossom Events</div>
         <div class="brand-sub" id="brandSub">Event Business ERP</div>
@@ -414,8 +414,9 @@ function applyBranding(){
   document.getElementById('brandName').textContent = App.settings.bizName || 'Blossom Events';
   document.title = (App.settings.bizName||'Blossom Events')+' ERP';
   const logoEl=document.getElementById('brandLogo');
-  if(App.settings.logo){ logoEl.innerHTML = `<img src="${App.settings.logo}">`; }
-  else { logoEl.textContent = Util.initials(App.settings.bizName||'Blossom')[0]; }
+  const fallbackLogo = 'logo.png';
+  if(App.settings.logo){ logoEl.innerHTML = `<img src="${App.settings.logo}" alt="Brand logo">`; }
+  else { logoEl.innerHTML = `<img src="${fallbackLogo}" alt="Brand logo">`; }
 }
 function applyTheme(t){
   if(t==='system'){ t = window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; }
