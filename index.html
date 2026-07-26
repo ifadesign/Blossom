@@ -339,6 +339,7 @@ function dbClear(store){ return new Promise((res,rej)=>{ const r=tx(store,'readw
 /* ---------------- APP STATE ---------------- */
 const App = { settings:{}, cache:{}, view:'dashboard', viewParams:{} };
 STORES.forEach(s=>{ if(s!=='settings') App.cache[s]=[]; });
+window.App = App;
 
 function C(store){ return App.cache[store]; }
 function findById(store,id){ return C(store).find(x=>x.id===id); }
@@ -436,6 +437,46 @@ function inferDirection(target, current){
   if(tIndex === -1 || cIndex === -1 || tIndex === cIndex) return 'forward';
   return tIndex < cIndex ? 'back' : 'forward';
 }
+function pushAppState(state){
+  App.historyIndex = (App.historyIndex || 0) + 1;
+  history.pushState({ ...state, idx: App.historyIndex }, '', '');
+}
+let _backExitTimer = null;
+let _backExitPromptShown = false;
+function handleBackNavigation(){
+  if(App.activeModal === 'sheet'){
+    closeSheet();
+    return true;
+  }
+  if(App.activeModal === 'confirm'){
+    closeConfirm();
+    return true;
+  }
+  if(App.view === 'dashboard'){
+    if(_backExitPromptShown){
+      clearTimeout(_backExitTimer);
+      _backExitPromptShown = false;
+      window.close?.();
+      return true;
+    }
+    _backExitPromptShown = true;
+    toast('Press back again to close the app');
+    clearTimeout(_backExitTimer);
+    _backExitTimer = setTimeout(()=>{ _backExitPromptShown = false; }, 2000);
+    return true;
+  }
+  return false;
+}
+const originalHistoryBack = window.history.back.bind(window.history);
+const originalHistoryGo = window.history.go.bind(window.history);
+window.history.back = function(){
+  if(handleBackNavigation()) return;
+  return originalHistoryBack();
+};
+window.history.go = function(delta){
+  if(delta < 0 && handleBackNavigation()) return;
+  return originalHistoryGo(delta);
+};
 const Nav = {
   go(view, params, replaceHistory, direction){
     const effectiveDirection = direction || inferDirection(view, App.view);
@@ -469,12 +510,9 @@ const Nav = {
   }
 };
 window.addEventListener('popstate', (event)=>{
+  if(handleBackNavigation()) return;
   const state = event.state;
   if(state && state.app==='blossom'){
-    if(state.modal === 'sheet'){
-      closeSheet();
-      return;
-    }
     const direction = state.idx < App.historyIndex ? 'back' : 'forward';
     App.historyIndex = state.idx;
     Nav.go(state.view, state.params, true, direction);
@@ -537,15 +575,19 @@ function openSheet(title, bodyHtml){
   const backdrop = document.getElementById('sheetBackdrop');
   backdrop.classList.remove('closing');
   backdrop.classList.add('open');
-  history.pushState({app:'blossom', modal:'sheet'}, '', '');
+  App.activeModal = 'sheet';
+  pushAppState({app:'blossom', modal:'sheet', view:App.view, params:App.viewParams});
 }
 function closeSheet(){
   const backdrop = document.getElementById('sheetBackdrop');
   const sheet = backdrop.querySelector('.sheet');
+  App.activeModal = null;
+  backdrop.classList.remove('open');
   backdrop.classList.add('closing');
   sheet.classList.add('slide-down');
   sheet.addEventListener('animationend', ()=>{
-    backdrop.classList.remove('open','closing');
+    backdrop.classList.remove('closing');
+    backdrop.classList.remove('open');
     sheet.classList.remove('slide-down');
   }, {once:true});
 }
@@ -562,16 +604,24 @@ function toast(msg, undoFn){
 }
 function undoWrap(){ if(window.__lastUndo){ window.__lastUndo(); window.__lastUndo=null; document.getElementById('toast').classList.remove('show'); } }
 
+function closeConfirm(){
+  const el=document.getElementById('confirmBackdrop');
+  App.activeModal = null;
+  el.classList.remove('open');
+  el.innerHTML='';
+}
 function confirmDialog(title,msg,onYes,okLabel){
   const el=document.getElementById('confirmBackdrop');
   el.innerHTML = `<div class="confirm-box">
     <h3>${Util.esc(title)}</h3><p>${Util.esc(msg)}</p>
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="document.getElementById('confirmBackdrop').classList.remove('open')">Cancel</button>
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirmYesBtn">${Util.esc(okLabel||'Delete')}</button>
     </div></div>`;
+  App.activeModal = 'confirm';
+  pushAppState({app:'blossom', modal:'confirm', view:App.view, params:App.viewParams});
   el.classList.add('open');
-  document.getElementById('confirmYesBtn').onclick=()=>{ el.classList.remove('open'); onYes(); };
+  document.getElementById('confirmYesBtn').onclick=()=>{ el.classList.remove('open'); App.activeModal=null; onYes(); };
 }
 
 /* ---------------- FIELD RENDERER (shared by all entity forms) ---------------- */
