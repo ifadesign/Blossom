@@ -129,25 +129,33 @@ main{flex:1;padding:0 16px 100px;}
 .fab:active{transform:scale(0.92);}
 
 /* Bottom nav */
-.bottom-nav{position:fixed;bottom:12px;left:12px;right:12px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.07);border-radius:24px;display:flex;gap:8px;z-index:25;max-width:520px;margin:0 auto;padding:10px;box-shadow:0 18px 50px rgba(14,19,30,0.12);backdrop-filter:blur(18px);}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--plum),var(--plum-2));border:1px solid rgba(255,255,255,0.14);border-radius:0;display:flex;gap:8px;z-index:25;width:100%;margin:0;padding:10px 12px 10px;box-shadow:0 18px 50px rgba(14,19,30,0.2);backdrop-filter:blur(18px);-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform;backface-visibility:hidden;color:#fff;} 
+@supports (bottom: max(12px, env(safe-area-inset-bottom))) {
+  .bottom-nav{bottom: max(0px, env(safe-area-inset-bottom));}
+}
+.nav-item{color:rgba(255,255,255,0.75);border-radius:0;} 
+.nav-item.active{color:#fff;background:rgba(105, 5, 5, 0.14);border-color:rgba(119, 13, 13, 0.726);box-shadow:0 10px 24px rgba(24, 3, 116, 0.12);} 
+.nav-item.active span, .nav-item.active svg{color:#fff;} 
+.nav-item span, .nav-item svg{color:inherit;} 
 [data-theme="dark"] .bottom-nav{background:rgba(12,10,15,0.92);border-color:rgba(255,255,255,0.08);box-shadow:0 18px 50px rgba(0,0,0,0.35);}
 .nav-item{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 10px;border-radius:18px;color:var(--ink-soft);cursor:pointer;border:1px solid transparent;background:transparent;font-family:inherit;transition:background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
 .nav-item:hover{background:rgba(131,70,180,0.06);}
 .nav-item:active{transform:none;}
-.nav-item.active{color:var(--plum);background:rgba(131,70,180,0.1);border-color:rgba(131,70,180,0.16);box-shadow:0 10px 24px rgba(131,70,180,0.12);}
+.nav-item:focus{outline:0;}
+.nav-item.active{color:var(--plum);background:rgba(131,70,180,0.1);border-color:rgba(9, 44, 160, 0.16);box-shadow:0 10px 24px rgba(131,70,180,0.12);}
 [data-theme="dark"] .nav-item.active{color:var(--gold-2);background:rgba(250,204,88,0.12);border-color:rgba(250,204,88,0.18);box-shadow:0 10px 24px rgba(225,169,36,0.16);}
 .nav-item svg{width:22px;height:22px;}
 .nav-item span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;}
 
 @media (max-width:520px){
-  .bottom-nav{left:8px;right:8px;bottom:8px;padding:8px;gap:6px;border-radius:22px;}
-  .nav-item{padding:9px 8px;gap:3px;border-radius:16px;}
+  .bottom-nav{left:0;right:0;bottom:0;padding:8px 10px 8px;gap:6px;border-radius:0;}
+  .nav-item{padding:9px 8px;gap:3px;border-radius:0;}
   .nav-item svg{width:20px;height:20px;}
   .nav-item span{font-size:10px;letter-spacing:.1em;}
 }
 
 @media (max-width:420px){
-  .bottom-nav{left:6px;right:6px;bottom:6px;padding:6px;gap:5px;}
+  .bottom-nav{left:0;right:0;bottom:0;padding:6px 8px;gap:5px;}
   .nav-item{padding:8px 6px;}
 }
 
@@ -426,15 +434,47 @@ const Nav = {
       history.pushState({app:'blossom', view, params: params||{}, idx: App.historyIndex}, '', '');
     }
     App.view = view; App.viewParams = params||{};
+    // On touch mobile, lock the viewport height briefly to avoid browser chrome (address bar)
+    // resizing which causes fixed elements to jump.
+    const isTouchMobile = (('ontouchstart' in window) || ('visualViewport' in window)) && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    let _locked=false;
+    let _prevHtmlHeight='';
+    function lockViewport(){
+      try{
+        const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        _prevHtmlHeight = document.documentElement.style.height || '';
+        document.documentElement.style.height = h + 'px';
+        document.documentElement.style.overflow = 'hidden';
+        _locked = true;
+      }catch(e){ _locked=false; }
+    }
+    function unlockViewport(){
+      try{ if(_locked){ document.documentElement.style.height = _prevHtmlHeight; document.documentElement.style.overflow = ''; _locked=false; } }catch(e){}
+    }
+    if(isTouchMobile) lockViewport();
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view || (view==='more-'&&b.dataset.view==='more')));
     const main=document.getElementById('mainView');
+    // blur any focused input (prevents mobile keyboard/viewport changes)
+    try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){}
     main.scrollTop=0;
     if(Views[view]) main.innerHTML = Views[view](params);
     else main.innerHTML = Views.notfound();
     updateFab();
+    // Keep bottom nav pinned by CSS only; avoid runtime repositioning on mobile.
+    try{
+      const bn = document.querySelector('.bottom-nav');
+      if(bn){
+        bn.style.transition = '';
+        bn.style.transform = '';
+        bn.style.bottom = '';
+      }
+    }catch(e){}
     if(App.initialized){
-      animateView(effectiveDirection);
+      // Avoid slide animations on touch/mobile where they cause viewport jumps
+      if(!isTouchMobile) animateView(effectiveDirection);
     }
+    // restore viewport lock shortly after view update
+    if(isTouchMobile) setTimeout(unlockViewport, 450);
   }
 };
 window.addEventListener('popstate', (event)=>{
@@ -445,9 +485,27 @@ window.addEventListener('popstate', (event)=>{
     Nav.go(state.view, state.params, true, direction);
   }
 });
-document.querySelectorAll('.nav-item').forEach(btn=>{
-  btn.onclick=()=>Nav.go(btn.dataset.view);
-});
+// Improved touch handling: call Nav.go on touchstart to avoid mobile viewport jumps,
+// and ignore the subsequent synthetic click when touch was used.
+(function setupNavTouchHandlers(){
+  let lastTouch = 0;
+  document.querySelectorAll('.nav-item').forEach(btn=>{
+    const view = btn.dataset.view;
+    btn.addEventListener('touchstart', (e)=>{
+      // allow preventing default to avoid focus/keyboard effects
+      if(e.cancelable) e.preventDefault();
+      lastTouch = Date.now();
+      try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){}
+      Nav.go(view);
+    }, {passive:false});
+
+    btn.addEventListener('click', (e)=>{
+      // ignore click if it immediately follows a touch
+      if(Date.now() - lastTouch < 800) return;
+      Nav.go(view);
+    });
+  });
+})();
 
 function updateFab(){
   const fab=document.getElementById('fabBtn');
@@ -471,6 +529,9 @@ function animateView(direction){
   main.classList.add(direction==='back' ? 'slide-in-left' : 'slide-in-right');
   main.addEventListener('animationend', ()=> main.classList.remove('slide-in-right','slide-in-left'), {once:true});
 }
+
+// Remove visualViewport bottom adjustment on mobile; keep fixed bottom nav pinned by CSS only.
+// Chrome mobile can jump when the browser chrome resizes, so avoid JS bottom changes here.
 
 /* ---------------- SHEET / TOAST / CONFIRM ---------------- */
 function openSheet(title, bodyHtml){
