@@ -54,6 +54,10 @@ button{font-family:inherit;}
 .icon-btn:hover{background:rgba(131,70,180,0.08);border-color:rgba(131,70,180,0.18);}
 [data-theme="dark"] .icon-btn:hover{background:rgba(250,204,88,0.12);border-color:rgba(250,204,88,0.18);}
 .icon-btn:active{transform:scale(0.95);}
+/* WhatsApp inline button */
+.wa-btn{background:#25D366;border-color:transparent;color:#fff;width:36px;height:36px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;margin-left:8px;border:0;}
+.wa-btn svg{width:18px;height:18px;display:block;fill:currentColor}
+.wa-btn:hover{filter:brightness(0.95);}
 
 /* View header */
 .view-title{font-family:var(--font-display);font-size:22px;font-weight:600;margin:6px 16px 2px;}
@@ -102,9 +106,9 @@ main{flex:1;min-height:0;padding:0 16px 100px;position:relative;overflow-y:auto;
 .row-main{flex:1;min-width:0;}
 .row-title{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .row-sub{font-size:12px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.row-end{text-align:right;flex-shrink:0;}
+.row-end{text-align:right;flex-shrink:0;display:flex;align-items:center;gap:8px;justify-content:flex-end;}
 .row-amt{font-family:var(--font-mono);font-weight:700;font-size:14px;}
-.chip{display:inline-block;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:3px;letter-spacing:.3px;}
+.chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px;letter-spacing:.3px;}
 .chip.ok{background:rgba(62,142,90,0.15);color:var(--ok);}
 .chip.warn{background:rgba(199,123,43,0.15);color:var(--warn);}
 .chip.danger{background:rgba(180,68,59,0.15);color:var(--danger);}
@@ -1215,7 +1219,13 @@ const EventsUI = {
       <div class="avatar">🎉</div>
       <div class="row-main"><div class="row-title">${Util.esc(e.title||'Untitled Event')}</div>
         <div class="row-sub">${Util.esc(e.customerName||'')} · ${Util.dateShort(Util.toTS(e.eventDate))}</div></div>
-      <div class="row-end">${this.statusChip(e.status)}<div class="row-amt" style="margin-top:3px;">${pending>0?Util.money(pending)+' due':Util.money(e.contractAmount)}</div></div>
+      <div class="row-end">
+        ${this.statusChip(e.status)}
+        <div class="row-amt" style="margin-top:3px;">${pending>0?Util.money(pending)+' due':Util.money(e.contractAmount)}</div>
+        <button class="icon-btn wa-btn" title="Send WhatsApp reminder" onclick="event.stopPropagation(); EventsUI.sendWhatsappReminder('${e.id}')" aria-label="Send WhatsApp reminder">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M20.52 3.48A11.94 11.94 0 0012 0C5.373 0 .001 5.373.001 12c0 2.115.556 4.183 1.611 6.02L0 24l6.268-1.61A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12 0-3.205-1.25-6.214-3.48-8.52zM12 21.5c-1.94 0-3.82-.52-5.45-1.5l-.39-.22-3.72.96.99-3.63-.25-.37A9.5 9.5 0 1121.5 12 9.49 9.49 0 0112 21.5zM17.1 14.2c-.28-.14-1.66-.82-1.92-.91-.26-.09-.45-.14-.64.14-.19.28-.74.91-.91 1.1-.17.19-.34.22-.62.07-.28-.14-1.18-.44-2.24-1.38-.83-.74-1.39-1.66-1.55-1.93-.16-.28-.02-.43.12-.57.12-.12.28-.32.42-.48.14-.16.19-.28.28-.47.09-.19.05-.36-.02-.5-.07-.14-.64-1.54-.88-2.11-.23-.55-.47-.48-.64-.49-.17-.01-.37-.01-.57-.01-.19 0-.5.07-.76.36-.26.28-1 1-1 2.45s1.03 2.84 1.17 3.04c.14.19 2.02 3.08 4.9 4.32 1.24.53 2.21.85 2.97 1.08 1.25.36 2.39.31 3.29.19.99-.13 3.05-1.24 3.48-2.44.43-1.19.43-2.21.3-2.44-.12-.22-.44-.36-.92-.5-.47-.14-2.78-1.03-3.06-1.15z"/></svg>
+        </button>
+      </div>
     </div>`;
   },
   list(){
@@ -1285,6 +1295,24 @@ const EventsUI = {
     const created = await addRecord('events',ev);
     toast('Event duplicated'); Nav.go('eventDetail',{id:created.id});
   },
+  sendWhatsappReminder(id){
+    const ev = findById('events', id);
+    if(!ev){ toast('Event not found'); return; }
+    const cust = findById('customers', ev.customerId) || {};
+    const num = (ev.customerWhatsapp || ev.customerPhone || cust.whatsapp || cust.phone || '').toString().replace(/[^0-9]/g,'');
+    if(!num){ toast('No WhatsApp number available for this customer'); return; }
+    const name = ev.customerName || cust.name || '';
+    const title = ev.title || 'your event';
+    const date = Util.date(Util.toTS(ev.eventDate));
+    const loc = ev.location ? (' at '+ev.location) : '';
+    const biz = App.settings && App.settings.bizName ? App.settings.bizName : 'Blossom';
+    const received = eventReceived(id);
+    const pendingAmt = Math.max(0,(Number(ev.contractAmount)||0)-received);
+    const pendingText = pendingAmt>0 ? (` There is ${Util.money(pendingAmt)} pending.`) : '';
+    const msg = `Hi ${name}, this is a reminder for ${title} on ${date}${loc}.${pendingText} - ${biz}`;
+    const url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+    try{ window.open(url, '_blank'); }catch(e){ location.href = url; }
+  },
   archive(id){
     confirmDialog('Archive event?','Archived events are hidden from the main list but not deleted.', async ()=>{
       const ev={...findById('events',id)}; ev.archived=true; await updateRecord('events',ev);
@@ -1303,7 +1331,7 @@ const EventsUI = {
   },
 
   openPaymentForm(eventId){
-    openSheet('Record Payment', `
+    openSheet('Record Collections', `
       <div class="field"><label>Date</label><input type="date" id="pDate" value="${Util.todayISO()}"></div>
       <div class="field"><label>Amount *</label><input type="number" id="pAmount"></div>
       <div class="field"><label>Mode</label><select id="pMode">${['Cash','UPI','Bank','Cheque','Partner Paid'].map(m=>`<option>${m}</option>`).join('')}</select></div>
@@ -1507,7 +1535,7 @@ Views.eventDetail = function(params){
   const received = eventReceived(ev.id); const expense = eventExpenses(ev.id);
   const pending = Math.max(0,(Number(ev.contractAmount)||0)-received);
   const profit = eventProfit(ev);
-  const tabs=[['overview','Overview'],['payments','Payments'],['expenses','Expenses'],['resources','Resources'],['workers','Workers'],['photos','Photos & Docs']];
+  const tabs=[['overview','Overview'],['payments','Collections'],['expenses','Expenses'],['resources','Resources'],['workers','Workers'],['photos','Photos & Docs']];
 
   let body='';
   if(tab==='overview'){
@@ -1546,11 +1574,11 @@ Views.eventDetail = function(params){
 `;
   } else if(tab==='payments'){
     const pays = Util.sortByDateDesc(C('payments').filter(p=>p.eventId===ev.id),'date');
-    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openPaymentForm('${ev.id}')">+ Record Payment</button><div style="height:12px"></div>`
+    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openPaymentForm('${ev.id}')">+ Record Collection</button><div style="height:12px"></div>`
       + (pays.length? pays.map(p=>`<div class="list-row" onclick="EventsUI.removePayment('${p.id}','${ev.id}')">
           <div class="avatar">💵</div><div class="row-main"><div class="row-title">${Util.money(p.amount)}</div><div class="row-sub">${Util.esc(p.mode||'')} · ${Util.date(Util.toTS(p.date))}</div></div>
           <div class="row-end"><span class="chip neutral">${Util.esc((findById('wallets',p.wallet)||{}).name||'')}</span></div></div>`).join('')
-        : `<div class="empty"><div class="empty-icon">💵</div><div class="empty-title">No payments yet</div></div>`);
+        : `<div class="empty"><div class="empty-icon">💵</div><div class="empty-title">No collections yet</div></div>`);
   } else if(tab==='expenses'){
     const exps = Util.sortByDateDesc(C('expenses').filter(e=>e.eventId===ev.id),'date');
     body = `<button class="btn btn-primary btn-block" onclick="ExpensesUI.openForm(null,'${ev.id}')">+ Add Expense</button><div style="height:12px"></div>`
@@ -1560,7 +1588,10 @@ Views.eventDetail = function(params){
         : `<div class="empty"><div class="empty-icon">🧾</div><div class="empty-title">No expenses logged</div></div>`);
   } else if(tab==='resources'){
     const rsv = C('reservations').filter(r=>r.eventId===ev.id);
-    body = `<button class="btn btn-primary btn-block" onclick="EventsUI.openReserveForm('${ev.id}')">+ Reserve Resource</button><div style="height:12px"></div>`
+    body = `<div class="tag-row" style="margin-bottom:12px;">
+        <button class="btn btn-primary btn-sm" onclick="EventsUI.openReserveForm('${ev.id}')">+ Reserve Resource</button>
+        <button class="btn btn-primary btn-sm" style="margin-left:6px;" onclick="Entities.resources.openForm();">+ Add Resource</button>
+      </div><div style="height:12px"></div>`
       + (rsv.length? rsv.map(r=>{ const res=findById('resources',r.resourceId)||{name:'Deleted'};
           return `<div class="list-row">
           <div class="avatar">🎪</div><div class="row-main"><div class="row-title">${Util.esc(res.name)}</div><div class="row-sub">Qty ${r.qty} · ${r.status==='returned'?'Returned':'Out'} · ${Util.dateShort(Util.toTS(r.date))}</div></div>
@@ -1572,6 +1603,7 @@ Views.eventDetail = function(params){
     body = `<div class="tag-row" style="margin-bottom:12px;">
         <button class="btn btn-primary btn-sm" onclick="EventsUI.openAssignWorkerForm('${ev.id}')">+ Attendance</button>
         <button class="btn btn-gold btn-sm" onclick="EventsUI.openWorkerPayForm('${ev.id}')">+ Pay Worker</button>
+        <button class="btn btn-primary btn-sm" style="margin-left:6px;" onclick="Entities.workers.openForm();">+ Add Worker</button>
       </div>
       <div class="section-label">Attendance</div>
       ${att.length? att.map(a=>{ const w=findById('workers',a.workerId)||{name:'Deleted'};
