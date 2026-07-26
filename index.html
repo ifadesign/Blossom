@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>Blossom Events ERP</title>
-<link rel="manifest" id="manifestLink">
+<meta name="theme-color" content="#11204B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Blossom ERP">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -260,6 +267,7 @@ a.link{color:var(--plum);text-decoration:none;font-weight:600;}
     </div>
     <div class="topbar-actions">
       <button class="icon-btn" id="themeToggle" title="Toggle theme">🌓</button>
+      <button class="icon-btn" onclick="SettingsUI.installApp()" title="Install app">⬇️</button>
       <button class="icon-btn" onclick="Nav.go('settings')" title="Settings">⚙️</button>
     </div>
   </div>
@@ -463,6 +471,10 @@ const Nav = {
 window.addEventListener('popstate', (event)=>{
   const state = event.state;
   if(state && state.app==='blossom'){
+    if(state.modal === 'sheet'){
+      closeSheet();
+      return;
+    }
     const direction = state.idx < App.historyIndex ? 'back' : 'forward';
     App.historyIndex = state.idx;
     Nav.go(state.view, state.params, true, direction);
@@ -525,6 +537,7 @@ function openSheet(title, bodyHtml){
   const backdrop = document.getElementById('sheetBackdrop');
   backdrop.classList.remove('closing');
   backdrop.classList.add('open');
+  history.pushState({app:'blossom', modal:'sheet'}, '', '');
 }
 function closeSheet(){
   const backdrop = document.getElementById('sheetBackdrop');
@@ -2114,6 +2127,11 @@ Views.settings = function(){
       <button class="btn btn-ghost btn-block" onclick="SettingsUI.savePin()">Update PIN</button>
     </div>
     <div class="card">
+      <div class="row-title" style="margin-bottom:6px;">Install App</div>
+      <div class="muted" style="font-size:13px;margin-bottom:10px;">Install Blossom ERP on your device for a faster, full-screen experience.</div>
+      <button class="btn btn-primary btn-block" onclick="SettingsUI.installApp()">⬇️ Install App</button>
+    </div>
+    <div class="card">
       <div class="row-title" style="margin-bottom:6px;">About</div>
       <div class="muted" style="font-size:13px;">Blossom Events ERP · Version 1.0<br>An offline-first business manager for event companies. All data is stored locally on this device via IndexedDB.</div>
     </div>
@@ -2141,6 +2159,23 @@ const SettingsUI = {
     toast('Business details saved');
   },
   async setTheme(t){ App.settings.theme=t; await updateRecordSettings(); applyTheme(t); toast('Theme updated'); },
+  async installApp(){
+    if(window.__deferredInstallPrompt){
+      try{
+        const result = await window.__deferredInstallPrompt.prompt();
+        if(result && result.outcome === 'accepted'){
+          toast('App installation started');
+        } else {
+          toast('Install was dismissed');
+        }
+      } catch(e){
+        toast('Unable to start install right now');
+      }
+      window.__deferredInstallPrompt = null;
+      return;
+    }
+    toast('Use your browser\'s Install app option if the prompt is not available.');
+  },
   async savePin(){
     const v = document.getElementById('stPin').value.trim();
     if(v && !/^\d{4}$/.test(v)){ toast('PIN must be 4 digits'); return; }
@@ -2161,20 +2196,19 @@ const SettingsUI = {
    PWA SETUP
    ============================================================ */
 function setupPWA(){
-  try{
-    const manifest = {
-      name: (App.settings.bizName||'Blossom Events')+' ERP',
-      short_name: (App.settings.bizName||'Blossom').slice(0,12),
-      start_url: '.', display: 'standalone', background_color:'#FBF7F4', theme_color:'#4A1942',
-      icons: [{ src: App.settings.logo || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" rx="20" fill="%234A1942"/%3E%3Ctext x="50" y="66" font-size="50" text-anchor="middle" fill="white" font-family="serif"%3EB%3C/text%3E%3C/svg%3E', sizes:'192x192', type:'image/png' }]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-    document.getElementById('manifestLink').setAttribute('href', URL.createObjectURL(blob));
-  }catch(e){ /* manifest is a progressive enhancement only */ }
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
 
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     window.__deferredInstallPrompt = e;
+  });
+
+  window.addEventListener('appinstalled', ()=>{
+    window.__deferredInstallPrompt = null;
   });
 }
 
