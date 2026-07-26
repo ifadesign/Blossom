@@ -1305,11 +1305,11 @@ const EventsUI = {
     const title = ev.title || 'your event';
     const date = Util.date(Util.toTS(ev.eventDate));
     const loc = ev.location ? (' at '+ev.location) : '';
-    const biz = App.settings && App.settings.bizName ? App.settings.bizName : 'Blossom';
+    const biz = App.settings && App.settings.bizName ? App.settings.bizName : 'Blossom Events';
     const received = eventReceived(id);
     const pendingAmt = Math.max(0,(Number(ev.contractAmount)||0)-received);
-    const pendingText = pendingAmt>0 ? (` There is ${Util.money(pendingAmt)} pending.`) : '';
-    const msg = `Hi ${name}, this is a reminder for ${title} on ${date}${loc}.${pendingText} - ${biz}`;
+    const pendingText = Util.money(pendingAmt);
+    const msg = `Dear Customer 😊 This is a friendly reminder. There is ${pendingText} pending. Please pay as soon as possible. Thank You\n\n- ${biz} ❤️`;
     const url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
     try{ window.open(url, '_blank'); }catch(e){ location.href = url; }
   },
